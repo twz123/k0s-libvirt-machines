@@ -3,6 +3,7 @@
 /id_rsa.pub
 /image/alpine-make-vm-image
 
+.docker-image.*
 *.tmp
 
 # Created by https://www.toptal.com/developers/gitignore/api/terraform

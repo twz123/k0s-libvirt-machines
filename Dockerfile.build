@@ -1,0 +1,14 @@
+ARG ALPINE_VERSION
+FROM docker.io/library/alpine:$ALPINE_VERSION
+# https://github.com/vasi/qcow2-fuse/issues/4
+RUN set -ex \
+  && apk add libgcc fuse qemu-img \
+  && apk add --virtual .build-deps \
+   curl \
+   rust \
+   cargo \
+   fuse-dev \
+   pkgconf \
+  && cargo install --root /usr/local qcow2-fuse \
+  && apk del .build-deps \
+  && rm -rf /tmp/* /var/cache/apk/* /root/.cargo
