@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# https://raw.githubusercontent.com/alpinelinux/alpine-make-vm-image/v0.8.0/alpine-make-vm-image
+# Based on https://github.com/alpinelinux/alpine-make-vm-image/blob/v0.8.0/example/configure.sh
 
 _step_counter=0
 step() {
@@ -22,12 +22,13 @@ EOF
 ln -s networking /etc/init.d/net.lo
 # ln -s networking /etc/init.d/net.eth0
 
-step 'Adjust rc.conf'
+step 'Adjust init system'
 sed -Ei \
   -e 's/^[# ](rc_depend_strict)=.*/\1=NO/' \
   -e 's/^[# ](rc_logger)=.*/\1=YES/' \
   -e 's/^[# ](unicode)=.*/\1=YES/' \
   /etc/rc.conf
+sed -Ei -e 's/^(tty\d+:)/# \1/' /etc/inittab # Disable TTYs
 
 step 'Enable services'
 rc-update add machine-id boot

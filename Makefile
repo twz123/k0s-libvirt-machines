@@ -32,19 +32,21 @@ alpine.qcow2: image/alpine-make-vm-image image/packages image/build.sh
 	@echo Building $@ ...
 	@[ ! -f '$@' ] || rm -f -- '$@'
 	@{ \
-	  $(QEMU_IMG) create -f '$(image_format)' $($@.opts) '$@' '$($@.size)' \
+	  $(QEMU_IMG) create -f '$(image_format)' $($@.opts) '$@.tmp' '$($@.size)' \
 	  && $(SUDO) image/alpine-make-vm-image \
 	    --branch '$(alpine.branch)' \
 	    --image-format '$(image_format)' \
 	    --packages '$(shell cat image/packages)' \
 	    --script-chroot \
-	    '$@' \
+	    '$@.tmp' \
 	    image/build.sh \
+	  && $(QEMU_IMG) convert -f '$(image_format)' -O '$(image_format)' -c $($@.opts) '$@.tmp' '$@' \
 	  && chmod a-w '$@' \
+	  && rm -- '$@.tmp' \
 	  ; \
 	} \
 	  || { \
-	    code=$$?; rm -f -- '$@' && exit $$code \
+	    code=$$?; rm -f -- '$@' '$@.tmp' && exit $$code \
 	    ; \
 	  }
 
@@ -65,7 +67,7 @@ id_rsa.pub:
 
 clean:
 	-$(MAKE) destroy
-	-rm -rf image/alpine-make-vm-image alpine.qcow2 alpine.qcow2.tmp
+	-rm -f image/alpine-make-vm-image alpine.qcow2 alpine.qcow2.tmp
 	-rm -rf .terraform
 	-rm id_rsa id_rsa.pub
 
