@@ -17,7 +17,7 @@ resource "random_password" "password" {
 resource "libvirt_volume" "os_image" {
   name   = "${var.hostname}-os_image"
   pool   = "default"
-  source = "alpine.qcow2"
+  source = "alpine-image/image.qcow2"
   format = "qcow2"
 }
 

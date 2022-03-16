@@ -1,7 +1,5 @@
-/alpine.qcow2
 /id_rsa
 /id_rsa.pub
-/image/alpine-make-vm-image
 
 *.tmp
 
