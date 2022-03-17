@@ -3,27 +3,21 @@ JQ = jq
 SSH = ssh
 
 .PHONY: apply
-apply: alpine-image/image.qcow2 .terraform/.init id_rsa.pub
+apply: .terraform/.init id_rsa.pub
+	$(MAKE) -C alpine-image image.qcow2
 	$(TF) apply -auto-approve
 
-.PHONY: metadata
-metadata:
-	$(TF) refresh && $(TF) output ips
-
-.PHONY: ssh
-ssh: IP ?= $(shell $(TF) output -json ips | $(JQ) -r '.[0][0]')
-ssh:
-	@[ '$(IP)' != null ] || { echo 'Run `$(MAKE) metadata` first.' 1>&2; exit 1; }
+ssh.%: ID ?= 0
+ssh.%: IP ?= $(shell $(TF) output -json  $(patsubst .%,%,$(suffix $@))_infos | jq -r '.[$(ID)].ips[] | select(contains("::") | not)')
+.PHONY: ssh.controller
+ssh.controller:
+	@[ -n '$(IP)' ] || { echo No IP found.; echo '$(TF) refresh'; $(TF) refresh; exit 1; }
 	$(SSH) -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ./id_rsa 'k0s@$(IP)'
 
 .PHONY: destroy
 destroy:
 	$(TF) destroy -auto-approve
 	-rm terraform.tfstate terraform.tfstate.backup
-
-.PHONY: alpine-image/%
-alpine-image/%:
-	$(MAKE) -C '$(dir $@)' '$(notdir $@)'
 
 id_rsa.pub:
 	ssh-keygen -t rsa -b 4096 -f id_rsa -C simple -N "" -q

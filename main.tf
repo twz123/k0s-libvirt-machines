@@ -1,64 +1,56 @@
-# variables that can be overriden
-variable "hostname" { default = "simple" }
-variable "domain" { default = "example.com" }
-variable "memoryMB" { default = 1024 * 1 }
-variable "cpu" { default = 1 }
-
-# instance the provider
 provider "libvirt" {
-  uri = "qemu:///system"
+  uri = var.libvirt_provider_uri
 }
 
-resource "random_password" "password" {
-  length = 32
+locals {
+  libvirt_resource_pool_name = "${var.libvirt_resource_name_prefix}resource-pool"
 }
 
-# declare the alpine base image
-resource "libvirt_volume" "os_image" {
-  name   = "${var.hostname}-os_image"
-  pool   = "default"
-  source = "alpine-image/image.qcow2"
-  format = "qcow2"
+# Creates a resource pool for virtual machine volumes
+resource "libvirt_pool" "resource_pool" {
+  name = local.libvirt_resource_pool_name
+
+  type = "dir"
+  path = pathexpand("${trimsuffix(var.libvirt_resource_pool_location, "/")}/${local.libvirt_resource_pool_name}")
 }
 
-# Use CloudInit ISO to add ssh-key to the instance
-resource "libvirt_cloudinit_disk" "commoninit" {
-  name           = "${var.hostname}-commoninit.iso"
-  pool           = "default"
-  user_data      = data.template_file.cloud_init_user_data.rendered
-  network_config = data.template_file.cloud_init_network_config.rendered
-}
+resource "libvirt_network" "network" {
+  name = "${var.libvirt_resource_name_prefix}network"
 
-data "template_file" "cloud_init_user_data" {
-  template = file("${path.module}/cloud-init-user-data.yaml.tpl")
-  vars = {
-    hostname = var.hostname
-    fqdn     = "${var.hostname}.${var.domain}"
-    password = random_password.password.result
+  mode      = "nat"
+  autostart = true
+  addresses = [var.libvirt_network_cidr]
+
+  dns {
+    enabled    = true
+    local_only = false
+  }
+
+  dhcp {
+    enabled = true
   }
 }
 
-data "template_file" "cloud_init_network_config" {
-  template = file("${path.module}/cloud-init-network-config.yaml.tpl")
+# Creates base OS image for the machines
+resource "libvirt_volume" "base" {
+  name = "${var.libvirt_resource_name_prefix}-base-volume"
+  pool = libvirt_pool.resource_pool.name
+
+  source = pathexpand(var.machine_image_source)
 }
 
-# Create the machine
-resource "libvirt_domain" "domain-k0s" {
-  name   = var.hostname
-  memory = var.memoryMB
-  vcpu   = var.cpu
+module "controllers" {
+  source = "./modules/machine"
 
-  disk {
-    volume_id = libvirt_volume.os_image.id
-  }
-  network_interface {
-    network_name = "default"
-  }
+  count = var.controller_num_nodes
 
-  cloudinit = libvirt_cloudinit_disk.commoninit.id
-}
+  libvirt_provider_uri       = var.libvirt_provider_uri
+  libvirt_resource_pool_name = libvirt_pool.resource_pool.name
+  libvirt_base_volume_id     = libvirt_volume.base.id
+  libvirt_network_id         = libvirt_network.network.id
 
-output "ips" {
-  # show IP, run 'terraform refresh' if not populated
-  value = libvirt_domain.domain-k0s.*.network_interface.0.addresses
+  machine_name     = "${var.libvirt_resource_name_prefix}controller-${count.index}"
+  machine_user     = var.machine_user
+  machine_num_cpus = var.controller_num_cpus
+  machine_memory   = var.controller_memory
 }
