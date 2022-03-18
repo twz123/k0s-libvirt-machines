@@ -99,3 +99,9 @@ variable "controller_memory" {
   description = "The amount of RAM (in MiB) allocated to a controller node"
   default     = 1024
 }
+
+variable "controller_k0s_enable_worker" {
+  type        = bool
+  description = "Whether k0s on the controllers should also schedule workloads"
+  default     = true
+}

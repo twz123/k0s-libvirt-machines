@@ -1,6 +1,7 @@
 /id_rsa
 /k0sctl.yaml
-/local.tfvars 
+/kubeconfig
+/local.tfvars
 
 *.tmp
 

@@ -1,16 +1,19 @@
 TF = terraform
 JQ = jq
 SSH = ssh
+K0SCTL = k0sctl
 
 .PHONY: apply
-apply: .terraform/.init local.tfvars
+apply: .tf.apply
+.tf.apply: .terraform/.init $(shell find . -type f -name '*.tf') local.tfvars
 	$(MAKE) -C alpine-image image.qcow2
 	$(TF) apply -auto-approve -var-file=local.tfvars
+	touch -- '$@'
 
 ssh.%: ID ?= 0
-ssh.%: IP ?= $(shell $(TF) output -json  $(patsubst .%,%,$(suffix $@))_infos | jq -r '.[$(ID)].ipv4')
+ssh.%: IP ?= $(shell $(TF) output -json $(patsubst .%,%,$(suffix $@))_infos | jq -r '.[$(ID)].ipv4')
 .PHONY: ssh.controller
-ssh.controller:
+ssh.controller: .tf.apply
 	@[ -n '$(IP)' ] || { echo No IP found.; echo '$(TF) refresh'; $(TF) refresh; exit 1; }
 	$(SSH) -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ./id_rsa 'k0s@$(IP)'
 
@@ -18,11 +21,15 @@ ssh.controller:
 destroy: .terraform/.init
 	$(TF) destroy -auto-approve
 	-rm terraform.tfstate terraform.tfstate.backup
+	-rm kubeconfig .k0sctl.apply
+	-rm .tf.apply
 
-clean:
-	-$(MAKE) destroy
-	-$(MAKE) -C alpine-image clean
-	-rm -rf .terraform
+.PHONY: k0sctl.apply
+k0sctl.apply: .k0sctl.apply
+.k0sctl.apply: .tf.apply
+	$(K0SCTL) apply --config=k0sctl.yaml
+	$(K0SCTL) kubeconfig >kubeconfig
+	touch -- '$@'
 
 .terraform/.init:
 	$(TF) init
@@ -42,3 +49,8 @@ local.tfvars:
 	  touch -- '$@' \
 	  ; \
 	fi
+
+clean:
+	-$(MAKE) destroy
+	-rm -rf .terraform
+	-$(MAKE) -C alpine-image clean
