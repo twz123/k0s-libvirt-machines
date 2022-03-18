@@ -1,3 +1,3 @@
 output "controller_infos" {
-  value = module.controllers.*.machine_info
+  value = module.controllers.*.info
 }

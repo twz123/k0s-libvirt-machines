@@ -11,7 +11,7 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
 
   user_data = format("#cloud-config\n%s", jsonencode({
     hostname         = var.machine_name
-    fqdn             = var.machine_name
+    fqdn             = join(".", [var.machine_name, var.machine_dns_domain])
     manage_etc_hosts = true
 
     users = [{
@@ -20,7 +20,7 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
       home                = "/home/${var.machine_user}"
       shell               = "/bin/sh"
       lock_passwd         = true
-      ssh-authorized-keys = [file("id_rsa.pub")]
+      ssh-authorized-keys = [var.machine_ssh_public_key]
     }]
 
     ssh_pwauth   = false
@@ -31,12 +31,18 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
       expire = false
     }
 
+    runcmd = [
+      # https://github.com/k0sproject/k0sctl/issues/334#issuecomment-1047694966
+      ["sh", "-c", "echo PubkeyAcceptedAlgorithms +ssh-rsa >> /etc/ssh/sshd_config"],
+      ["/etc/init.d/sshd", "restart"],
+    ]
+
     # written to /var/log/cloud-init-output.log
     final_message = "The system is finally up, after $UPTIME seconds"
   }))
 
   network_config = jsonencode({
     version   = 2
-    ethernets = { eth0 = { dhcp4 = true, }, }
+    ethernets = { eth0 = { dhcp4 = true, dhcp6 = true, }, }
   })
 }

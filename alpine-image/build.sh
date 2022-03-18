@@ -12,15 +12,13 @@ step 'Set up timezone'
 setup-timezone -z UTC
 
 step 'Set up networking'
-# cat >/etc/network/interfaces <<-EOF
-# 	iface lo inet loopback
-# 	iface eth0 inet dhcp
-# EOF
 cat >/etc/network/interfaces <<-EOF
 	iface lo inet loopback
+	iface eth0 inet dhcp
+  iface eth0 inet6 auto
 EOF
 ln -s networking /etc/init.d/net.lo
-# ln -s networking /etc/init.d/net.eth0
+ln -s networking /etc/init.d/net.eth0
 
 step 'Adjust init system'
 sed -Ei \
@@ -33,6 +31,7 @@ sed -Ei -e 's/^(tty\d+:)/# \1/' /etc/inittab # Disable TTYs
 step 'Enable services'
 rc-update add machine-id boot
 rc-update add net.lo boot
+rc-update add net.eth0 boot
 rc-update add termencoding boot
 rc-update add qemu-guest-agent boot
 

@@ -23,6 +23,11 @@ variable "machine_name" {
   description = "The virtual machine's name"
 }
 
+variable "machine_dns_domain" {
+  type        = string
+  description = "The virtual machine's DNS domain name"
+}
+
 variable "machine_num_cpus" {
   type        = number
   description = "The number CPUs allocated to the virtual machine"
@@ -36,4 +41,9 @@ variable "machine_memory" {
 variable "machine_user" {
   type        = string
   description = "Username used to SSH into the virtual machine"
+}
+
+variable "machine_ssh_public_key" {
+  type        = string
+  description = "SSH public key used to SSH into the virtual machine"
 }

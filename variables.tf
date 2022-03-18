@@ -28,14 +28,36 @@ variable "libvirt_resource_name_prefix" {
   }
 }
 
-variable "libvirt_network_cidr" {
+variable "libvirt_network_ipv4_cidr" {
   type        = string
-  description = "CIDR of the libvirt network of the virtual machines."
+  description = "IPv4 CIDR of the libvirt network of the virtual machines."
   default     = "10.83.134.0/24"
 
   validation {
-    condition     = can(regex("^([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}/([1-9]|[1-2][0-9]|3[0-2])$", var.libvirt_network_cidr))
-    error_message = "Invalid network CIDR."
+    condition     = can(regex("^([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}/([1-9]|[1-2][0-9]|3[0-2])$", var.libvirt_network_ipv4_cidr))
+    error_message = "Invalid IPv4 network CIDR."
+  }
+}
+
+variable "libvirt_network_ipv6_cidr" {
+  type        = string
+  description = "IPv6 CIDR of the libvirt network of the virtual machines."
+  default     = "fd43:7c8a:a2ba:00c2::/64"
+
+  validation {
+    condition     = can(regex("^[0-9a-f]{1,4}(:[0-9a-f]{1,4})+::/[0-9]+$", var.libvirt_network_ipv6_cidr))
+    error_message = "Invalid IPv6 network CIDR."
+  }
+}
+
+variable "libvirt_network_dns_domain" {
+  type        = string
+  description = "DNS domain of the libvirt network of the virtual machines."
+  default     = "k0s-net.local"
+
+  validation {
+    condition     = length(var.libvirt_network_dns_domain) != 0
+    error_message = "Libvirt network DNS domain cannot be empty."
   }
 }
 
@@ -63,7 +85,7 @@ variable "machine_user" {
 variable "controller_num_nodes" {
   type        = number
   description = "The number controller nodes to spin up"
-  default     = 3
+  default     = 1
 }
 
 variable "controller_num_cpus" {
