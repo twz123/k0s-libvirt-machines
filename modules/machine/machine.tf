@@ -19,6 +19,7 @@ resource "libvirt_domain" "machine" {
     network_id     = var.libvirt_network_id
     wait_for_lease = true
     hostname       = var.machine_name
+    addresses      = [var.machine_network_ipv4_address, var.machine_network_ipv6_address]
   }
 
   cloudinit = libvirt_cloudinit_disk.cloudinit.id

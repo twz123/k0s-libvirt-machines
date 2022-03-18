@@ -28,6 +28,16 @@ variable "machine_dns_domain" {
   description = "The virtual machine's DNS domain name"
 }
 
+variable "machine_network_ipv4_address" {
+  type        = string
+  description = "The virtual machine's IPv4 address"
+}
+
+variable "machine_network_ipv6_address" {
+  type        = string
+  description = "The virtual machine's IPv6 address"
+}
+
 variable "machine_num_cpus" {
   type        = number
   description = "The number CPUs allocated to the virtual machine"

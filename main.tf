@@ -62,11 +62,14 @@ module "controllers" {
   libvirt_base_volume_id     = libvirt_volume.base.id
   libvirt_network_id         = libvirt_network.network.id
 
-  machine_name       = "${var.libvirt_resource_name_prefix}controller-${count.index}"
-  machine_dns_domain = var.libvirt_network_dns_domain
+  machine_name = "${var.libvirt_resource_name_prefix}controller-${count.index}"
 
   machine_num_cpus = var.controller_num_cpus
   machine_memory   = var.controller_memory
+
+  machine_dns_domain           = var.libvirt_network_dns_domain
+  machine_network_ipv4_address = cidrhost(var.libvirt_network_ipv4_cidr, 10 + count.index)
+  machine_network_ipv6_address = cidrhost(var.libvirt_network_ipv6_cidr, 10 + count.index)
 
   machine_user           = var.machine_user
   machine_ssh_public_key = chomp(tls_private_key.ssh.public_key_openssh)

@@ -26,7 +26,7 @@ sed -Ei \
   -e 's/^[# ](rc_logger)=.*/\1=YES/' \
   -e 's/^[# ](unicode)=.*/\1=YES/' \
   /etc/rc.conf
-sed -Ei -e 's/^(tty\d+:)/# \1/' /etc/inittab # Disable TTYs
+#sed -Ei -e 's/^(tty\d+:)/# \1/' /etc/inittab # Disable TTYs
 
 step 'Enable services'
 rc-update add machine-id boot
@@ -39,5 +39,5 @@ step 'Setup cloud-init'
 setup-cloud-init
 
 step 'Modify defaults'
-passwd -l root          # prevent root logins
+#passwd -l root          # prevent root logins
 truncate -s 0 /etc/motd # no greetings
