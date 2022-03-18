@@ -1,5 +1,6 @@
 /id_rsa
 /k0sctl.yaml
+/local.tfvars 
 
 *.tmp
 

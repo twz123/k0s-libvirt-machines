@@ -42,7 +42,7 @@ variable "libvirt_network_ipv4_cidr" {
 variable "libvirt_network_ipv6_cidr" {
   type        = string
   description = "IPv6 CIDR of the libvirt network of the virtual machines."
-  default     = "fd43:7c8a:a2ba:00c2::/64"
+  default     = "fd43:7c8a:a2ba:c2::/64"
 
   validation {
     condition     = can(regex("^[0-9a-f]{1,4}(:[0-9a-f]{1,4})+::/[0-9]+$", var.libvirt_network_ipv6_cidr))

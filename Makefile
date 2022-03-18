@@ -3,9 +3,9 @@ JQ = jq
 SSH = ssh
 
 .PHONY: apply
-apply: .terraform/.init
+apply: .terraform/.init local.tfvars
 	$(MAKE) -C alpine-image image.qcow2
-	$(TF) apply -auto-approve
+	$(TF) apply -auto-approve -var-file=local.tfvars
 
 ssh.%: ID ?= 0
 ssh.%: IP ?= $(shell $(TF) output -json  $(patsubst .%,%,$(suffix $@))_infos | jq -r '.[$(ID)].ipv4')
@@ -27,3 +27,18 @@ clean:
 .terraform/.init:
 	$(TF) init
 	touch .terraform/.init
+
+local.tfvars:
+	@if [ ! -f '$@' ]; then \
+	  { \
+	    echo '# Put your variable overrides here ...' \
+	    ; echo \
+	    ; echo \
+	    ; \
+	  } >'$@' \
+	  ; echo Put your local variable overrides into $@ \
+	  ; \
+	else \
+	  touch -- '$@' \
+	  ; \
+	fi
