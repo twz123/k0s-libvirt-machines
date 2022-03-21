@@ -2,12 +2,13 @@ TF = terraform
 JQ = jq
 SSH = ssh
 K0SCTL = k0sctl
+KUBECTL = kubectl
 
 .PHONY: apply
 apply: .tf.apply
 .tf.apply: .terraform/.init $(shell find . -type f -name '*.tf') local.tfvars
 	$(MAKE) -C alpine-image image.qcow2
-	$(TF) apply -auto-approve -var-file=local.tfvars
+	$(TF) apply -auto-approve -var-file=local.tfvars -var=k0sctl_path='$(K0SCTL)'
 	touch -- '$@'
 
 ssh.%: ID ?= 0
@@ -21,17 +22,18 @@ ssh.controller: .tf.apply
 destroy: .terraform/.init
 	$(TF) destroy -auto-approve
 	-rm terraform.tfstate terraform.tfstate.backup
-	-rm kubeconfig .k0sctl.apply
+	@#-rm kubeconfig .k0sctl.apply
 	-rm .tf.apply
 
-.PHONY: k0sctl.apply
-k0sctl.apply: .k0sctl.apply
-.k0sctl.apply: .tf.apply
-	$(K0SCTL) apply --config=k0sctl.yaml
-	$(K0SCTL) kubeconfig >kubeconfig
-	touch -- '$@'
+# This is now hackend into k0sctl.tf
+# .PHONY: k0sctl.apply
+# k0sctl.apply: .k0sctl.apply
+# .k0sctl.apply: .tf.apply
+# 	$(K0SCTL) apply --config=k0sctl.yaml
+# 	$(K0SCTL) kubeconfig >kubeconfig
+# 	touch -- '$@'
 
-.terraform/.init:
+.terraform/.init: $(shell find . -type f -name 'terraform.tf')
 	$(TF) init
 	touch .terraform/.init
 

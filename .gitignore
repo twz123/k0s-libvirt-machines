@@ -1,3 +1,4 @@
+/.tf.apply
 /id_rsa
 /k0sctl.yaml
 /kubeconfig

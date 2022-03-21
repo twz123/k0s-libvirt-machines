@@ -111,3 +111,9 @@ variable "k0s_version" {
   description = "The k0s version to deploy on the machines. May be an exact version, \"stable\" or \"latest\"."
   default     = "stable"
 }
+
+variable "k0sctl_path" {
+  type        = string
+  description = "Path to the k0sctl binary to use for local-exec provisioning."
+  default     = "k0sctl"
+}

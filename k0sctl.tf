@@ -7,7 +7,7 @@ data "http" "k0s_version" {
   url   = "https://docs.k0sproject.io/${var.k0s_version}.txt"
 }
 
-resource "local_file" "k0sctl_yaml" {
+resource "local_file" "k0sctl_config" {
   filename        = "k0sctl.yaml"
   file_permission = "0666"
 
@@ -28,4 +28,34 @@ resource "local_file" "k0sctl_yaml" {
       }]
     }
   })
+}
+
+resource "null_resource" "k0s_apply" {
+  triggers = {
+    k0sctl_config = local_file.k0sctl_config.content
+  }
+
+  provisioner "local-exec" {
+    command = "'${var.k0sctl_path}' apply '${local_file.k0sctl_config.filename}'"
+  }
+}
+
+data "external" "k0s_kubeconfig" {
+  # Dirty hack to get the kubeconfig into Terrafrom. Requires jq.
+  program = [
+    "/usr/bin/env", "sh", "-ec",
+    <<-EOF
+      KUBECONFIG="$('${var.k0sctl_path}' kubeconfig --config='${local_file.k0sctl_config.filename}')"
+      printf %s "$KUBECONFIG" | jq --raw-input --slurp '{kubeconfig: .}'
+    EOF
+  ]
+
+  depends_on = [null_resource.k0s_apply]
+}
+
+resource "local_file" "k0sctl_kubeconfig" {
+  filename        = "kubeconfig"
+  file_permission = "0600"
+
+  content = data.external.k0s_kubeconfig.result.kubeconfig
 }
