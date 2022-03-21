@@ -105,3 +105,9 @@ variable "controller_k0s_enable_worker" {
   description = "Whether k0s on the controllers should also schedule workloads"
   default     = true
 }
+
+variable "k0s_version" {
+  type        = string
+  description = "The k0s version to deploy on the machines. May be an exact version, \"stable\" or \"latest\"."
+  default     = "stable"
+}
