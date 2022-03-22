@@ -33,6 +33,12 @@ destroy: .terraform/.init
 # 	$(K0SCTL) kubeconfig >kubeconfig
 # 	touch -- '$@'
 
+.PHONY: kube-env
+kube-env:
+	@echo '# use like so: eval "$$($(MAKE) $@)"'
+	@echo export KUBECONFIG="'$(CURDIR)/kubeconfig'":'"$${KUBECONFIG-$$HOME/.kube/config}"'
+	@echo echo KUBECONFIG set.
+
 .terraform/.init: $(shell find . -type f -name 'terraform.tf')
 	$(TF) init
 	touch .terraform/.init
