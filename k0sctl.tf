@@ -1,5 +1,19 @@
 locals {
   use_remote_k0s_version = var.k0s_version == "stable" || var.k0s_version == "latest"
+
+  machines = concat(
+    [for machine in module.controllers.*.info :
+      merge(machine, {
+        controller_enabled = true
+        worker_enabled     = var.controller_k0s_enable_worker
+      })
+    ],
+    [for machine in module.workers.*.info :
+      merge(machine, {
+        controller_enabled = false
+        worker_enabled     = true
+      })
+  ])
 }
 
 data "http" "k0s_version" {
@@ -20,11 +34,11 @@ resource "local_file" "k0sctl_config" {
         version = local.use_remote_k0s_version ? chomp(data.http.k0s_version.0.body) : var.k0s_version
         config  = { spec = { telemetry = { enabled = false, }, }, }
       }
-      hosts = [for info in module.controllers.*.info : merge(
+      hosts = [for machine in local.machines : merge(
         {
-          role = var.controller_k0s_enable_worker ? "controller+worker" : "controller"
+          role = machine.controller_enabled ? (machine.worker_enabled ? "controller+worker" : "controller") : "worker"
           ssh = {
-            address = info.ipv4
+            address = machine.ipv4
             keyPath = local_file.id_rsa.filename
             port    = 22
             user    = var.machine_user
@@ -34,7 +48,7 @@ resource "local_file" "k0sctl_config" {
         var.k0sctl_k0s_binary_path == null ? {} : {
           k0sBinaryPath = var.k0sctl_k0s_binary_path
         },
-        var.controller_k0s_enable_worker && var.k0sctl_airgap_image_bundle != null ? {
+        machine.worker_enabled && var.k0sctl_airgap_image_bundle != null ? {
           files = [
             {
               src    = var.k0sctl_airgap_image_bundle

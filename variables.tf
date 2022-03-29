@@ -103,14 +103,37 @@ variable "controller_memory" {
 variable "controller_k0s_enable_worker" {
   type        = bool
   description = "Whether k0s on the controllers should also schedule workloads"
-  default     = true
+  default     = false
 }
 
+# Worker node parameters
+
+variable "worker_num_nodes" {
+  type        = number
+  description = "The number worker nodes to spin up"
+  default     = 1
+}
+
+variable "worker_num_cpus" {
+  type        = number
+  description = "The number CPUs allocated to a worker node"
+  default     = 1
+}
+
+variable "worker_memory" {
+  type        = number
+  description = "The amount of RAM (in MiB) allocated to a worker node"
+  default     = 1024
+}
+
+# k0s variables
 variable "k0s_version" {
   type        = string
   description = "The k0s version to deploy on the machines. May be an exact version, \"stable\" or \"latest\"."
   default     = "stable"
 }
+
+# k0sctl variables
 
 variable "k0sctl_binary_path" {
   type        = string

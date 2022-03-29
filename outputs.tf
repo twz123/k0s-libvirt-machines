@@ -1,3 +1,3 @@
-output "controller_infos" {
-  value = module.controllers.*.info
+output "machines" {
+  value = local.machines
 }

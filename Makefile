@@ -13,9 +13,9 @@ apply: .tf.apply
 	touch -- '$@'
 
 ssh.%: ID ?= 0
-ssh.%: IP ?= $(shell $(TF) output -json $(patsubst .%,%,$(suffix $@))_infos | jq -r '.[$(ID)].ipv4')
-.PHONY: ssh.controller
-ssh.controller: .tf.apply
+ssh.%: IP ?= $(shell $(TF) output -json machines | $(JQ) -r '.[] | select(.name | endswith("$(patsubst .%,%,$(suffix $@))-$(ID)")).ipv4')
+.PHONY: ssh.controller ssh.worker
+ssh.controller ssh.worker: .tf.apply
 	@[ -n '$(IP)' ] || { echo No IP found.; echo '$(TF) refresh'; $(TF) refresh; exit 1; }
 	$(SSH) -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ./id_rsa 'k0s@$(IP)'
 
