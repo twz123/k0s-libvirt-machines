@@ -32,10 +32,33 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
     }
 
     runcmd = [
+      # https://github.com/kubernetes/kubernetes/issues/108877
+      <<-EOF
+        {
+          # for kube-proxy
+          echo ip_tables
+          # echo iptable_filter
+          # echo iptable_nat
+          # echo iptable_mangle
+
+          # https://github.com/kubernetes/kubernetes/blob/v1.23.4/pkg/proxy/ipvs/README.md#prerequisite
+          # echo ip_vs
+          # echo ip_vs_rr
+          # echo ip_vs_wrr
+          # echo ip_vs_sh
+          # echo nf_conntrack
+        } >>/etc/modules \
+          && modprobe -a -- $(cat /etc/modules)
+      EOF
+      ,
       # https://github.com/k0sproject/k0sctl/issues/334#issuecomment-1047694966
-      ["sh", "-c", "echo PubkeyAcceptedAlgorithms +ssh-rsa >> /etc/ssh/sshd_config"],
-      ["/etc/init.d/sshd", "restart"],
+      "echo PubkeyAcceptedAlgorithms +ssh-rsa >>/etc/ssh/sshd_config && /etc/init.d/sshd restart",
+      "rc-update add cgroups boot",
+      "rc-update add sshd boot",
     ]
+
+    # apply network config on every boot
+    updates = { network = { when = ["boot"], }, }
 
     # written to /var/log/cloud-init-output.log
     final_message = "The system is finally up, after $UPTIME seconds"

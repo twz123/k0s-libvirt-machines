@@ -1,8 +1,10 @@
-TF = terraform
-JQ = jq
-SSH = ssh
-K0SCTL = k0sctl
-KUBECTL = kubectl
+DOCKER ?= docker
+JQ ?= jq
+K0SCTL ?= k0sctl
+K0S ?= k0s
+KUBECTL ?= kubectl
+SSH ?= ssh
+TF ?= terraform
 
 .PHONY: apply
 apply: .tf.apply
@@ -17,6 +19,19 @@ ssh.%: IP ?= $(shell $(TF) output -json $(patsubst .%,%,$(suffix $@))_infos | jq
 ssh.controller: .tf.apply
 	@[ -n '$(IP)' ] || { echo No IP found.; echo '$(TF) refresh'; $(TF) refresh; exit 1; }
 	$(SSH) -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ./id_rsa 'k0s@$(IP)'
+
+.PHONY: airgap-images.tar
+airgap-images.tar:
+	@set -e \
+	  && set -- \
+	  && images="$$($(K0S) airgap list-images)" \
+	  && for image in $$images; do \
+	    $(DOCKER) pull -- "$$image" \
+	    && set -- "$$@" "$$image" \
+	  ; done \
+	  && echo Saving $@ ... \
+	  && $(DOCKER) image save "$$@" -o '$@.tmp' \
+	  && mv -- '$@.tmp' '$@'
 
 .PHONY: destroy
 destroy: .terraform/.init
@@ -61,4 +76,5 @@ local.tfvars:
 clean:
 	-$(MAKE) destroy
 	-rm -rf .terraform
+	-rm airgap-images.tar airgap-images.tar.tmp
 	-$(MAKE) -C alpine-image clean

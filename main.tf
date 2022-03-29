@@ -46,7 +46,7 @@ resource "libvirt_network" "network" {
 
 # Creates base OS image for the machines
 resource "libvirt_volume" "base" {
-  name = "${var.libvirt_resource_name_prefix}-base-volume"
+  name = "${var.libvirt_resource_name_prefix}base-volume"
   pool = libvirt_pool.resource_pool.name
 
   source = pathexpand(var.machine_image_source)

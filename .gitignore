@@ -1,4 +1,5 @@
 /.tf.apply
+/airgap-images.tar
 /id_rsa
 /k0sctl.yaml
 /kubeconfig

@@ -117,3 +117,19 @@ variable "k0sctl_path" {
   description = "Path to the k0sctl binary to use for local-exec provisioning."
   default     = "k0sctl"
 }
+
+variable "k0sctl_k0s_binary_path" {
+  type        = string
+  description = "Path to the k0s binary to use, or null if it should be downloaded"
+  default     = null
+}
+
+variable "k0sctl_airgap_image_bundle" {
+  type        = string
+  description = <<-EOD
+    Path to the airgap image bundle to be copied to the worker-enabled nodes, or null
+    if it should be downloaded. See https://docs.k0sproject.io/head/airgap-install/
+    for details on that.
+  EOD
+  default     = null
+}
