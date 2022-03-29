@@ -112,9 +112,9 @@ variable "k0s_version" {
   default     = "stable"
 }
 
-variable "k0sctl_path" {
+variable "k0sctl_binary_path" {
   type        = string
-  description = "Path to the k0sctl binary to use for local-exec provisioning."
+  description = "Path to the k0sctl binary to use for local-exec provisioning, or null to skip k0sctl resources."
   default     = "k0sctl"
 }
 

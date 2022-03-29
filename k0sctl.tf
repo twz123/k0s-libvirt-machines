@@ -49,14 +49,16 @@ resource "local_file" "k0sctl_config" {
   })
 }
 
-resource "null_resource" "k0s_apply" {
+resource "null_resource" "k0sctl_apply" {
+  count = var.k0sctl_binary_path == null ? 0 : 1
+
   triggers = {
     k0sctl_config = local_file.k0sctl_config.content
   }
 
   provisioner "local-exec" {
     command = join(" ", [
-      "'${var.k0sctl_path}'", "apply",
+      "'${var.k0sctl_binary_path}'", "apply",
       "--disable-telemetry", "--disable-upgrade-check",
       "'${local_file.k0sctl_config.filename}'",
     ])
@@ -64,21 +66,25 @@ resource "null_resource" "k0s_apply" {
 }
 
 data "external" "k0s_kubeconfig" {
+  count = var.k0sctl_binary_path == null ? 0 : 1
+
   # Dirty hack to get the kubeconfig into Terrafrom. Requires jq.
   program = [
     "/usr/bin/env", "sh", "-ec",
     <<-EOF
-      KUBECONFIG="$('${var.k0sctl_path}' kubeconfig --config='${local_file.k0sctl_config.filename}')"
+      KUBECONFIG="$('${var.k0sctl_binary_path}' kubeconfig --config='${local_file.k0sctl_config.filename}')"
       printf %s "$KUBECONFIG" | jq --raw-input --slurp '{kubeconfig: .}'
     EOF
   ]
 
-  depends_on = [null_resource.k0s_apply]
+  depends_on = [null_resource.k0sctl_apply]
 }
 
 resource "local_file" "k0sctl_kubeconfig" {
+  count = var.k0sctl_binary_path == null ? 0 : 1
+
   filename        = "kubeconfig"
   file_permission = "0600"
 
-  content = data.external.k0s_kubeconfig.result.kubeconfig
+  content = data.external.k0s_kubeconfig[0].result.kubeconfig
 }

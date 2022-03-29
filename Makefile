@@ -1,6 +1,5 @@
 DOCKER ?= docker
 JQ ?= jq
-K0SCTL ?= k0sctl
 K0S ?= k0s
 KUBECTL ?= kubectl
 SSH ?= ssh
@@ -10,7 +9,7 @@ TF ?= terraform
 apply: .tf.apply
 .tf.apply: .terraform/.init $(shell find . -type f -name '*.tf') local.tfvars
 	$(MAKE) -C alpine-image image.qcow2
-	$(TF) apply -auto-approve -var-file=local.tfvars -var=k0sctl_path='$(K0SCTL)'
+	$(TF) apply -auto-approve -var-file=local.tfvars
 	touch -- '$@'
 
 ssh.%: ID ?= 0
@@ -37,16 +36,8 @@ airgap-images.tar:
 destroy: .terraform/.init
 	$(TF) destroy -auto-approve
 	-rm terraform.tfstate terraform.tfstate.backup
-	@#-rm kubeconfig .k0sctl.apply
+	@#-rm kubeconfig
 	-rm .tf.apply
-
-# This is now hackend into k0sctl.tf
-# .PHONY: k0sctl.apply
-# k0sctl.apply: .k0sctl.apply
-# .k0sctl.apply: .tf.apply
-# 	$(K0SCTL) apply --config=k0sctl.yaml
-# 	$(K0SCTL) kubeconfig >kubeconfig
-# 	touch -- '$@'
 
 .PHONY: kube-env
 kube-env:
@@ -64,14 +55,11 @@ local.tfvars:
 	    echo '# Put your variable overrides here ...' \
 	    ; echo \
 	    ; echo \
-	    ; \
-	  } >'$@' \
+	  ; } >'$@' \
 	  ; echo Put your local variable overrides into $@ \
-	  ; \
-	else \
+	; else \
 	  touch -- '$@' \
-	  ; \
-	fi
+	; fi
 
 clean:
 	-$(MAKE) destroy
