@@ -43,6 +43,10 @@ resource "local_file" "k0sctl_config" {
             port    = 22
             user    = var.machine_user
           }
+          installFlags = [
+            # https://github.com/k0sproject/k0sctl/issues/362
+            "--force"
+          ]
           uploadBinary = true
         },
         var.k0sctl_k0s_binary_path == null ? {} : {
