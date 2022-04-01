@@ -21,11 +21,8 @@ data "http" "k0s_version" {
   url   = "https://docs.k0sproject.io/${var.k0s_version}.txt"
 }
 
-resource "local_file" "k0sctl_config" {
-  filename        = "k0sctl.yaml"
-  file_permission = "0666"
-
-  content = yamlencode({
+locals {
+  k0sctl_config = {
     apiVersion = "k0sctl.k0sproject.io/v1beta1"
     kind       = "Cluster"
     metadata   = { name = "k0s-cluster" }
@@ -39,18 +36,18 @@ resource "local_file" "k0sctl_config" {
           role = machine.controller_enabled ? (machine.worker_enabled ? "controller+worker" : "controller") : "worker"
           ssh = {
             address = machine.ipv4
-            keyPath = local_file.id_rsa.filename
+            keyPath = local_file.ssh_private_key.filename
             port    = 22
             user    = var.machine_user
           }
           installFlags = [
             # https://github.com/k0sproject/k0sctl/issues/362
-            "--force"
+            #"--force"
           ]
           uploadBinary = true
         },
-        var.k0sctl_k0s_binary_path == null ? {} : {
-          k0sBinaryPath = var.k0sctl_k0s_binary_path
+        var.k0sctl_k0s_binary == null ? {} : {
+          k0sBinaryPath = var.k0sctl_k0s_binary
         },
         machine.worker_enabled && var.k0sctl_airgap_image_bundle != null ? {
           files = [
@@ -64,45 +61,40 @@ resource "local_file" "k0sctl_config" {
         } : {},
       )]
     }
-  })
+  }
 }
 
 resource "null_resource" "k0sctl_apply" {
-  count = var.k0sctl_binary_path == null ? 0 : 1
+  count = var.k0sctl_binary == null ? 0 : 1
 
   triggers = {
-    k0sctl_config = local_file.k0sctl_config.content
+    k0sctl_config = jsonencode(local.k0sctl_config)
   }
 
   provisioner "local-exec" {
-    command = join(" ", [
-      "'${var.k0sctl_binary_path}'", "apply",
-      "--disable-telemetry", "--disable-upgrade-check",
-      "'${local_file.k0sctl_config.filename}'",
-    ])
+    environment = {
+      K0SCTL_BINARY = var.k0sctl_binary
+      K0SCTL_CONFIG = jsonencode(local.k0sctl_config)
+    }
+
+    command = <<-EOF
+      printf %s "$K0SCTL_CONFIG" | "$K0SCTL_BINARY" apply --disable-telemetry --disable-upgrade-check -c -
+      EOF
   }
 }
 
 data "external" "k0s_kubeconfig" {
-  count = var.k0sctl_binary_path == null ? 0 : 1
-
   # Dirty hack to get the kubeconfig into Terrafrom. Requires jq.
+
+  count = var.k0sctl_binary == null ? 0 : 1
+  query = {
+    k0sctl_config = jsonencode(local.k0sctl_config)
+  }
+
   program = [
     "/usr/bin/env", "sh", "-ec",
-    <<-EOF
-      KUBECONFIG="$('${var.k0sctl_binary_path}' kubeconfig --config='${local_file.k0sctl_config.filename}')"
-      printf %s "$KUBECONFIG" | jq --raw-input --slurp '{kubeconfig: .}'
-    EOF
+    "jq '.k0sctl_config | fromjson' | '${var.k0sctl_binary}' kubeconfig --disable-telemetry -c - | jq --raw-input --slurp '{kubeconfig: .}'",
   ]
 
   depends_on = [null_resource.k0sctl_apply]
-}
-
-resource "local_file" "k0sctl_kubeconfig" {
-  count = var.k0sctl_binary_path == null ? 0 : 1
-
-  filename        = "kubeconfig"
-  file_permission = "0600"
-
-  content = data.external.k0s_kubeconfig[0].result.kubeconfig
 }

@@ -1,3 +1,13 @@
+variable "resource_name_prefix" {
+  type        = string
+  description = "Prefix to be prepended to all resource names."
+
+  validation {
+    condition     = var.resource_name_prefix != null && can(regex("^([a-z][a-z0-9-_]*)?$", var.resource_name_prefix))
+    error_message = "Invalid resource prefix."
+  }
+}
+
 # General libvirt configuration
 
 variable "libvirt_provider_uri" {
@@ -17,21 +27,9 @@ variable "libvirt_resource_pool_location" {
   }
 }
 
-variable "libvirt_resource_name_prefix" {
-  type        = string
-  description = "Prefix added to libvirt resources"
-  default     = "k0s-"
-
-  validation {
-    condition     = length(var.libvirt_resource_name_prefix) != 0
-    error_message = "Libvirt resource name prefix cannot be empty."
-  }
-}
-
 variable "libvirt_network_ipv4_cidr" {
   type        = string
   description = "IPv4 CIDR of the libvirt network of the virtual machines."
-  default     = "10.83.134.0/24"
 
   validation {
     condition     = can(regex("^([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}/([1-9]|[1-2][0-9]|3[0-2])$", var.libvirt_network_ipv4_cidr))
@@ -41,23 +39,23 @@ variable "libvirt_network_ipv4_cidr" {
 
 variable "libvirt_network_ipv6_cidr" {
   type        = string
-  description = "IPv6 CIDR of the libvirt network of the virtual machines."
-  default     = "fd43:7c8a:a2ba:c2::/64"
+  description = "IPv6 CIDR of the libvirt network of the virtual machines, or null to not specify any."
+  default     = null
 
   validation {
-    condition     = can(regex("^[0-9a-f]{1,4}(:[0-9a-f]{1,4})+::/[0-9]+$", var.libvirt_network_ipv6_cidr))
+    condition     = var.libvirt_network_ipv6_cidr == null || can(regex("^[0-9a-f]{1,4}(:[0-9a-f]{1,4})+::/[0-9]+$", var.libvirt_network_ipv6_cidr))
     error_message = "Invalid IPv6 network CIDR."
   }
 }
 
 variable "libvirt_network_dns_domain" {
   type        = string
-  description = "DNS domain of the libvirt network of the virtual machines."
-  default     = "k0s-net.local"
+  description = "DNS domain of the libvirt network of the virtual machines, or null if a domain name should be auto-generated."
+  default     = null
 
   validation {
-    condition     = length(var.libvirt_network_dns_domain) != 0
-    error_message = "Libvirt network DNS domain cannot be empty."
+    condition     = var.libvirt_network_dns_domain == null || can(regex("^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$", var.libvirt_network_dns_domain))
+    error_message = "Invalid libvirt network DNS domain."
   }
 }
 
@@ -76,7 +74,7 @@ variable "machine_image_source" {
 
 variable "machine_user" {
   type        = string
-  description = "Username used to SSH into virtual machines"
+  description = "Username used to SSH into virtual machines."
   default     = "k0s"
 }
 
@@ -84,25 +82,25 @@ variable "machine_user" {
 
 variable "controller_num_nodes" {
   type        = number
-  description = "The number controller nodes to spin up"
+  description = "The number controller nodes to spin up."
   default     = 1
 }
 
 variable "controller_num_cpus" {
   type        = number
-  description = "The number CPUs allocated to a controller node"
+  description = "The number CPUs allocated to a controller node."
   default     = 1
 }
 
 variable "controller_memory" {
   type        = number
-  description = "The amount of RAM (in MiB) allocated to a controller node"
+  description = "The amount of RAM (in MiB) allocated to a controller node."
   default     = 1024
 }
 
 variable "controller_k0s_enable_worker" {
   type        = bool
-  description = "Whether k0s on the controllers should also schedule workloads"
+  description = "Whether k0s on the controllers should also schedule workloads."
   default     = false
 }
 
@@ -110,19 +108,19 @@ variable "controller_k0s_enable_worker" {
 
 variable "worker_num_nodes" {
   type        = number
-  description = "The number worker nodes to spin up"
+  description = "The number worker nodes to spin up."
   default     = 1
 }
 
 variable "worker_num_cpus" {
   type        = number
-  description = "The number CPUs allocated to a worker node"
+  description = "The number CPUs allocated to a worker node."
   default     = 1
 }
 
 variable "worker_memory" {
   type        = number
-  description = "The amount of RAM (in MiB) allocated to a worker node"
+  description = "The amount of RAM (in MiB) allocated to a worker node."
   default     = 1024
 }
 
@@ -135,15 +133,15 @@ variable "k0s_version" {
 
 # k0sctl variables
 
-variable "k0sctl_binary_path" {
+variable "k0sctl_binary" {
   type        = string
   description = "Path to the k0sctl binary to use for local-exec provisioning, or null to skip k0sctl resources."
   default     = "k0sctl"
 }
 
-variable "k0sctl_k0s_binary_path" {
+variable "k0sctl_k0s_binary" {
   type        = string
-  description = "Path to the k0s binary to use, or null if it should be downloaded"
+  description = "Path to the k0s binary to use, or null if it should be downloaded."
   default     = null
 }
 

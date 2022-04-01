@@ -1,9 +1,7 @@
-/.tf.apply
-/airgap-images.tar
-/id_rsa
-/k0sctl.yaml
-/kubeconfig
-/local.tfvars
+/.tf.apply.*
+/*-airgap-images.tar
+/*-kubeconfig
+/*-ssh-private-key.pem
 
 *.tmp
 
