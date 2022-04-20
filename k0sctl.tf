@@ -40,10 +40,7 @@ locals {
             port    = 22
             user    = var.machine_user
           }
-          installFlags = [
-            # https://github.com/k0sproject/k0sctl/issues/362
-            #"--force"
-          ]
+          installFlags = var.k0sctl_k0s_install_flags
           uploadBinary = true
         },
         var.k0sctl_k0s_binary == null ? {} : {
@@ -68,7 +65,9 @@ resource "null_resource" "k0sctl_apply" {
   count = var.k0sctl_binary == null ? 0 : 1
 
   triggers = {
-    k0sctl_config = jsonencode(local.k0sctl_config)
+    k0sctl_config            = jsonencode(local.k0sctl_config)
+    k0s_binary_hash          = var.k0sctl_k0s_binary == null ? null : filesha256(var.k0sctl_k0s_binary)
+    airgap_image_bundle_hash = var.k0sctl_airgap_image_bundle == null ? null : filesha256(var.k0sctl_airgap_image_bundle)
   }
 
   provisioner "local-exec" {

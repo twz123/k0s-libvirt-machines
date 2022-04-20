@@ -116,6 +116,8 @@ $(PROFILE)-profile.tfvars:
 		; echo 'k0s_version = "stable"' \
 		; echo '# Path to the k0s binary to use, or null if it should be downloaded.' \
 		; echo 'k0sctl_k0s_binary = null' \
+		; echo '# Install flags to be passed to k0s.' \
+		; echo 'k0sctl_k0s_install_flags = []' \
 		; echo '' \
 		; echo '# Whether k0s on the controllers should also schedule workloads.' \
 		; echo 'controller_k0s_enable_worker = false' \

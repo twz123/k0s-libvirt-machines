@@ -154,3 +154,14 @@ variable "k0sctl_airgap_image_bundle" {
   EOD
   default     = null
 }
+
+variable "k0sctl_k0s_install_flags" {
+  type        = list(string)
+  description = "Install flags to be passed to k0s."
+  default     = []
+
+  validation {
+    condition     = var.k0sctl_k0s_install_flags != null
+    error_message = "K0s install flags cannot be null."
+  }
+}
