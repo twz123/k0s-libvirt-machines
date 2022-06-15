@@ -3,6 +3,7 @@ QEMU_IMG = qemu-img
 
 alpine.branch = v3.16
 alpine-make-vm-image.url = https://raw.githubusercontent.com/alpinelinux/alpine-make-vm-image/v0.8.0/alpine-make-vm-image
+alpine-make-vm-image.sha256 = e6d5abd91f4fb344f52e756ff0494778890d6d477b70ca2484870db082c3b628
 image.qcow2.size = 8G
 image.qcow2.opts = -o nocow=on
 
@@ -33,6 +34,7 @@ alpine-make-vm-image:
 	@echo Downloading $(alpine-make-vm-image.url) ...
 	@{ \
 	  curl -Lfo '$@' '$(alpine-make-vm-image.url)' \
+	    && { echo '$(alpine-make-vm-image.sha256)  $@' | sha256sum -c; } \
 	    && chmod +x -- '$@' \
 	    ; \
 	} \
