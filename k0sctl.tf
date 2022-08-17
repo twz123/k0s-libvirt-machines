@@ -29,7 +29,10 @@ locals {
     spec = {
       k0s = {
         version = local.use_remote_k0s_version ? chomp(data.http.k0s_version.0.body) : var.k0s_version
-        config  = { spec = { telemetry = { enabled = false, }, }, }
+        config = { spec = merge(
+          { telemetry = { enabled = false, }, },
+          var.k0s_config_spec,
+        ), }
       }
       hosts = [for machine in local.machines : merge(
         {

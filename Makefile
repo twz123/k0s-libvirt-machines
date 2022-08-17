@@ -114,6 +114,8 @@ $(PROFILE)-profile.tfvars:
 	    ; echo \
 		; echo '# The k0s version to deploy on the machines. May be an exact version, "stable" or "latest".' \
 		; echo 'k0s_version = "stable"' \
+		; echo '# The k0s config spec' \
+		; echo 'k0s_config_spec = null' \
 		; echo '# Path to the k0s binary to use, or null if it should be downloaded.' \
 		; echo 'k0sctl_k0s_binary = null' \
 		; echo '# Install flags to be passed to k0s.' \

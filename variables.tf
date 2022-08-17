@@ -131,6 +131,20 @@ variable "k0s_version" {
   default     = "stable"
 }
 
+variable "k0s_config_spec" {
+  type = object({
+    api = object({
+      extraArgs = map(string),
+    }),
+    network = object({
+      provider = string,
+    }),
+    images = map(map(map(string))),
+  })
+  description = "The k0s config spec"
+  default     = null
+}
+
 # k0sctl variables
 
 variable "k0sctl_binary" {
