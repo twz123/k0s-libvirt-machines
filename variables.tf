@@ -131,15 +131,21 @@ variable "k0s_version" {
   default     = "stable"
 }
 
+variable "k0s_dynamic_config" {
+  type        = bool
+  description = "Whether to enable k0s dynamic configuration."
+  default     = false
+}
+
 variable "k0s_config_spec" {
   type = object({
-    api = object({
+    api = optional(object({
       extraArgs = map(string),
-    }),
-    network = object({
-      provider = string,
-    }),
-    images = map(map(map(string))),
+    })),
+    network = optional(object({
+      provider = optional(string),
+    })),
+    images = optional(map(map(map(string)))),
   })
   description = "The k0s config spec"
   default     = null
@@ -177,5 +183,27 @@ variable "k0sctl_k0s_install_flags" {
   validation {
     condition     = var.k0sctl_k0s_install_flags != null
     error_message = "K0s install flags cannot be null."
+  }
+}
+
+variable "k0sctl_k0s_controller_install_flags" {
+  type        = list(string)
+  description = "Install flags to be passed to k0s controllers."
+  default     = []
+
+  validation {
+    condition     = var.k0sctl_k0s_controller_install_flags != null
+    error_message = "K0s controller install flags cannot be null."
+  }
+}
+
+variable "k0sctl_k0s_worker_install_flags" {
+  type        = list(string)
+  description = "Install flags to be passed to k0s workers."
+  default     = []
+
+  validation {
+    condition     = var.k0sctl_k0s_worker_install_flags != null
+    error_message = "K0s worker install flags cannot be null."
   }
 }

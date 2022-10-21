@@ -28,10 +28,11 @@ locals {
     metadata   = { name = "k0s-cluster" }
     spec = {
       k0s = {
-        version = local.use_remote_k0s_version ? chomp(data.http.k0s_version.0.body) : var.k0s_version
+        version       = local.use_remote_k0s_version ? chomp(data.http.k0s_version.0.body) : var.k0s_version
+        dynamicConfig = var.k0s_dynamic_config
         config = { spec = merge(
           { telemetry = { enabled = false, }, },
-          var.k0s_config_spec,
+          { for k, v in var.k0s_config_spec : k => v if v != null }
         ), }
       }
       hosts = [for machine in local.machines : merge(
@@ -43,7 +44,11 @@ locals {
             port    = 22
             user    = var.machine_user
           }
-          installFlags = var.k0sctl_k0s_install_flags
+          installFlags = concat(
+            var.k0sctl_k0s_install_flags,
+            machine.controller_enabled ? var.k0sctl_k0s_controller_install_flags : [],
+            machine.worker_enabled ? var.k0sctl_k0s_worker_install_flags : [],
+          )
           uploadBinary = true
         },
         var.k0sctl_k0s_binary == null ? {} : {

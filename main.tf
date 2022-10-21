@@ -7,8 +7,8 @@ locals {
 }
 
 resource "tls_private_key" "ssh" {
-  algorithm = "RSA"
-  rsa_bits  = "4096"
+  algorithm   = "ECDSA"
+  ecdsa_curve = "P384"
 }
 
 resource "local_file" "ssh_private_key" {

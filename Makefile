@@ -8,8 +8,12 @@ PROFILE ?= k0s
 apply: $(PROFILE)-kubeconfig
 init: .terraform/.init
 destroy:
+	$(MAKE) .destroy
+
+PHONY: .destroy
+.destroy:
 	-rm -- '$(PROFILE).tfstate' '$(PROFILE).tfstate.backup'
-	-rm --'$(PROFILE)-kubeconfig'
+	-rm -- '$(PROFILE)-kubeconfig'
 	-rm '.tf.apply.$(PROFILE)'
 	[ -s '$(PROFILE)-profile.tfvars' ] || rm -f -- '$(PROFILE)-profile.tfvars'
 
@@ -114,12 +118,20 @@ $(PROFILE)-profile.tfvars:
 	    ; echo \
 		; echo '# The k0s version to deploy on the machines. May be an exact version, "stable" or "latest".' \
 		; echo 'k0s_version = "stable"' \
+		; echo '# Whether to enable k0s dynamic configuration.' \
+		; echo 'k0s_dynamic_config = false' \
 		; echo '# The k0s config spec' \
 		; echo 'k0s_config_spec = null' \
 		; echo '# Path to the k0s binary to use, or null if it should be downloaded.' \
 		; echo 'k0sctl_k0s_binary = null' \
+		; echo '# Path to the airgap image bundle to be copied to the worker-enabled nodes, or null.' \
+		; echo 'k0sctl_airgap_image_bundle = null' \
 		; echo '# Install flags to be passed to k0s.' \
 		; echo 'k0sctl_k0s_install_flags = []' \
+		; echo '# Install flags to be passed to k0s controllers.' \
+		; echo 'k0sctl_k0s_controller_install_flags = []' \
+		; echo '# Install flags to be passed to k0s workers.' \
+		; echo 'k0sctl_k0s_worker_install_flags = []' \
 		; echo '' \
 		; echo '# Whether k0s on the controllers should also schedule workloads.' \
 		; echo 'controller_k0s_enable_worker = false' \
@@ -153,7 +165,11 @@ $(PROFILE)-kubeconfig: .tf.apply.$(PROFILE)
 	$(MAKE) -s output -- -json kubeconfig | $(JQ) -r . >'$@'
 
 clean:
-	-$(MAKE) destroy
+	-if [ -f .terraform/init ]; then \
+	  $(MAKE) destroy; \
+	else \
+	  $(MAKE) .destroy; \
+	fi
 	-rm -rf .terraform
 	-rm -- '$(PROFILE)-airgap-images.tar' '$(PROFILE)-airgap-images.tar.tmp'
 	-$(MAKE) -C alpine-image clean
