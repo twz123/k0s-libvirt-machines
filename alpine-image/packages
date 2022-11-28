@@ -1,4 +1,6 @@
 cloud-init
+py3-pyserial
+py3-netifaces
 qemu-guest-agent
 openssh
 e2fsprogs
