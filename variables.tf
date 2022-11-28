@@ -142,6 +142,32 @@ variable "k0s_config_spec" {
     api = optional(object({
       extraArgs = map(string),
     })),
+    extensions = optional(object({
+      helm = optional(object({
+        repositories = optional(list(
+          object({
+            name     = string,
+            url      = string,
+            caFile   = optional(string),
+            certFile = optional(string),
+            insecure = optional(bool),
+            keyfile  = optional(string),
+            username = optional(string),
+            password = optional(string),
+          }),
+        )),
+        charts = optional(list(
+          object({
+            name      = string,
+            chartname = string,
+            version   = optional(string),
+            values    = optional(string),
+            namespace = string,
+            timeout   = optional(string),
+          }),
+        )),
+      })),
+    })),
     network = optional(object({
       provider = optional(string),
     })),
