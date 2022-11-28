@@ -121,7 +121,7 @@ $(PROFILE)-profile.tfvars:
 		; echo '# Whether to enable k0s dynamic configuration.' \
 		; echo 'k0s_dynamic_config = false' \
 		; echo '# The k0s config spec' \
-		; echo 'k0s_config_spec = null' \
+		; echo 'k0s_config_spec = {}' \
 		; echo '# Path to the k0s binary to use, or null if it should be downloaded.' \
 		; echo 'k0sctl_k0s_binary = null' \
 		; echo '# Path to the airgap image bundle to be copied to the worker-enabled nodes, or null.' \
