@@ -85,7 +85,7 @@ resource "null_resource" "k0sctl_apply" {
     }
 
     command = <<-EOF
-      printf %s "$K0SCTL_CONFIG" | "$K0SCTL_BINARY" apply --disable-telemetry --disable-upgrade-check -c -
+      printf %s "$K0SCTL_CONFIG" | env SSH_KNOWN_HOSTS= "$K0SCTL_BINARY" apply --disable-telemetry --disable-upgrade-check -c -
       EOF
   }
 }
