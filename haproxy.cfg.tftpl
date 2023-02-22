@@ -1,0 +1,38 @@
+defaults
+  mode tcp
+  timeout connect 10s
+  timeout server 60s
+  timeout client 60s
+
+resolvers system
+  parse-resolv-conf
+
+frontend k8s_api
+  bind :${k8s_api_port}
+  default_backend k8s_api
+
+backend k8s_api
+  balance random
+%{ for controller in controllers ~}
+  server ${controller.name} ${controller.name}:${k8s_api_port} resolvers system init-addr none check check-ssl verify none
+%{ endfor ~}
+
+frontend k0s_api
+  bind :${k0s_api_port}
+  default_backend k0s_api
+
+backend k0s_api
+  balance random
+%{ for controller in controllers ~}
+  server ${controller.name} ${controller.name}:${k0s_api_port} resolvers system init-addr none check check-ssl verify none
+%{ endfor ~}
+
+frontend konnectivity_server
+  bind :${konnectivity_server_port}
+  default_backend konnectivity_servers
+
+backend konnectivity_servers
+  balance roundrobin
+%{ for controller in controllers ~}
+  server ${controller.name} ${controller.name}:${konnectivity_server_port} resolvers system init-addr none check check-ssl verify none
+%{ endfor ~}

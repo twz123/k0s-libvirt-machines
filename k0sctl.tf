@@ -1,4 +1,8 @@
 locals {
+  k8s_api_port             = 6443
+  k0s_api_port             = 9443
+  konnectivity_server_port = 8132
+
   use_remote_k0s_version = var.k0s_version == "stable" || var.k0s_version == "latest"
 
   machines = concat(
@@ -13,7 +17,8 @@ locals {
         controller_enabled = false
         worker_enabled     = true
       })
-  ])
+    ],
+  )
 }
 
 data "http" "k0s_version" {
@@ -32,6 +37,13 @@ locals {
         dynamicConfig = var.k0s_dynamic_config
         config = { spec = merge(
           { telemetry = { enabled = false, }, },
+          (var.loadbalancer_enabled ? { api = {
+            externalAddress = module.loadbalancer.0.info.ipv4,
+            sans = [
+              module.loadbalancer.0.info.name,
+              module.loadbalancer.0.info.ipv4,
+            ],
+          }, } : {}),
           { for k, v in var.k0s_config_spec : k => v if v != null }
         ), }
       }

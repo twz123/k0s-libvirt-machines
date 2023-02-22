@@ -148,6 +148,9 @@ $(PROFILE)-profile.tfvars:
 		; echo 'worker_num_cpus = 1' \
 		; echo '# The number worker nodes to spin up.' \
 		; echo 'worker_num_nodes = 1' \
+	    ; echo \
+		; echo '# Whether to use a load balancer in front of the control plane.' \
+		; echo 'loadbalancer_enabled = false' \
 	  ; } >'$@' \
 	  ; echo The file $@ has been created with some local terraform variable overrides. 1>&2 \
 	  ; if [ -n "$$EDITOR" ]; then \

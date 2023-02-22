@@ -124,6 +124,14 @@ variable "worker_memory" {
   default     = 1024
 }
 
+# Load balancer variables
+
+variable "loadbalancer_enabled" {
+  type        = bool
+  description = "Whether to use a load balancer in front of the control plane."
+  default     = false
+}
+
 # k0s variables
 variable "k0s_version" {
   type        = string

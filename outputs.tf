@@ -2,6 +2,10 @@ output "machines" {
   value = local.machines
 }
 
+output "laodbalancer" {
+  value = one(module.loadbalancer.*.info)
+}
+
 output "ssh" {
   value = {
     user     = var.machine_user

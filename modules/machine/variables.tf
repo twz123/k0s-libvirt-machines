@@ -47,3 +47,25 @@ variable "machine_ssh_public_key" {
   type        = string
   description = "SSH public key used to SSH into the virtual machine"
 }
+
+variable "cloudinit_extra_runcmds" {
+  type        = list(string)
+  description = "xoxo"
+  default     = []
+
+  validation {
+    condition     = var.cloudinit_extra_runcmds != null
+    error_message = "cloud-init extra runcmds cannot be null."
+  }
+}
+
+
+variable "cloudinit_extra_user_data" {
+  type    = map(any)
+  default = {}
+
+  validation {
+    condition     = var.cloudinit_extra_user_data != null
+    error_message = "cloud-init extra data cannot be null."
+  }
+}

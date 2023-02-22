@@ -5,4 +5,5 @@ qemu-guest-agent
 openssh
 e2fsprogs
 e2fsprogs-extra
+haproxy
 sudo

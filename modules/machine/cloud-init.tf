@@ -9,7 +9,7 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
   name = "${var.machine_name}-cloudinit.iso"
   pool = var.libvirt_resource_pool_name
 
-  user_data = format("#cloud-config\n%s", jsonencode({
+  user_data = format("#cloud-config\n%s", jsonencode(merge(var.cloudinit_extra_user_data, {
     hostname         = var.machine_name
     fqdn             = join(".", [var.machine_name, var.machine_dns_domain])
     manage_etc_hosts = true
@@ -31,7 +31,7 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
       expire = false
     }
 
-    runcmd = [
+    runcmd = concat([
       # https://github.com/kubernetes/kubernetes/issues/108877
       <<-EOF
         {
@@ -55,14 +55,14 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
       "echo PubkeyAcceptedAlgorithms +ssh-rsa >>/etc/ssh/sshd_config && /etc/init.d/sshd restart",
       "rc-update add cgroups boot",
       "rc-update add sshd boot",
-    ]
+    ], var.cloudinit_extra_runcmds)
 
     # apply network config on every boot
     updates = { network = { when = ["boot"], }, }
 
     # written to /var/log/cloud-init-output.log
     final_message = "The system is finally up, after $UPTIME seconds"
-  }))
+  })))
 
   network_config = jsonencode({
     version   = 2
