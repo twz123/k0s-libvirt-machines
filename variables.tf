@@ -178,6 +178,18 @@ variable "k0s_config_spec" {
     })),
     network = optional(object({
       provider = optional(string),
+      calico   = optional(map(string)),
+      nodeLocalLoadBalancing = optional(object({
+        enabled = optional(bool),
+        type    = optional(string),
+        envoyProxy = optional(object({
+          image = optional(object({
+            image   = string,
+            version = string,
+          })),
+          port = optional(number),
+        })),
+      })),
     })),
     images = optional(map(map(map(string)))),
   })
