@@ -1,3 +1,13 @@
+variable "profile_folder" {
+  type        = string
+  description = "Folder in which to create profile-specific files."
+
+  validation {
+    condition     = var.profile_folder != null
+    error_message = "Profile folder cannot be empty."
+  }
+}
+
 variable "resource_name_prefix" {
   type        = string
   description = "Prefix to be prepended to all resource names."

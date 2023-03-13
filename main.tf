@@ -13,7 +13,7 @@ resource "tls_private_key" "ssh" {
 
 resource "local_file" "ssh_private_key" {
   content         = tls_private_key.ssh.private_key_pem
-  filename        = "${var.resource_name_prefix}ssh-private-key.pem"
+  filename        = "${var.profile_folder}/ssh-private-key.pem"
   file_permission = "0400"
 }
 

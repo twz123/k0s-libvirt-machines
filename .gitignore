@@ -1,7 +1,8 @@
 /.tf.apply.*
-/*-airgap-images.tar
-/*-kubeconfig
-/*-ssh-private-key.pem
+/profiles/
+#/*-airgap-images.tar
+#/*-kubeconfig
+# /*-ssh-private-key.pem
 
 *.tmp
 
