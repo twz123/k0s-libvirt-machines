@@ -9,11 +9,21 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
   name = "${var.machine_name}-cloudinit.iso"
   pool = var.libvirt_resource_pool_name
 
+  meta_data = format("#cloud-config\n%s", jsonencode({
+    hostname = var.machine_name
+
+    # https://gitlab.alpinelinux.org/alpine/cloud/tiny-cloud/-/blob/3.0.0_rc2/bin/imds#L58
+    # https://gitlab.alpinelinux.org/alpine/cloud/tiny-cloud/-/blob/3.0.0_rc2/bin/imds#L77-83
+    public-keys = [{ openssh-key = var.machine_ssh_public_key }]
+  }))
+
   user_data = format("#cloud-config\n%s", jsonencode(merge(var.cloudinit_extra_user_data, {
     hostname         = var.machine_name
     fqdn             = join(".", [var.machine_name, var.machine_dns_domain])
     manage_etc_hosts = true
 
+    # Note: this does not work with tiny-cloud, currently. The user must be
+    # already existing.
     users = [{
       name                = var.machine_user
       sudo                = "ALL=(ALL) NOPASSWD:ALL"

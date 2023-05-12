@@ -1,9 +1,7 @@
-cloud-init
-py3-pyserial
-py3-netifaces
+tiny-cloud-nocloud
 qemu-guest-agent
+doas
 openssh
 e2fsprogs
 e2fsprogs-extra
 haproxy
-sudo

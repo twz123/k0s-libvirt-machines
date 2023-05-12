@@ -1,8 +1,6 @@
+*.qcow2
 /.tf.apply.*
 /profiles/
-#/*-airgap-images.tar
-#/*-kubeconfig
-# /*-ssh-private-key.pem
 
 *.tmp
 

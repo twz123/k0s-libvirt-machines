@@ -5,6 +5,8 @@ TF ?= terraform
 
 PROFILE ?= k0s
 
+.DELETE_ON_ERROR:
+
 apply: profiles/$(PROFILE)/kubeconfig
 init: .terraform/.init
 destroy:
@@ -64,12 +66,17 @@ $(foreach cmd,$(TF_STATE_CMDS),$(eval $(cmd): .tf.$(cmd).$(PROFILE)))
 .alpine-image:
 	$(MAKE) -C alpine-image image.qcow2
 
+Rocky-9-GenericCloud.latest.x86_64.qcow2:
+	truncate -s0 -- '$@'
+	chattr +C -- '$@'
+	curl -Lo '$@' -- 'https://download.rockylinux.org/pub/rocky/9.1/images/x86_64/$@'
+
 ssh.%: ID ?= 0
 ssh.%: SSH_CONNECT ?= $(shell $(MAKE) -s output -- -json | $(JQ) -r '@sh "-i \(.ssh.value.key_file) \(.ssh.value.user)@\((.machines.value[] | select(.name | endswith("$(patsubst .%,%,$(suffix $@))-$(ID)")).ipv4))"')
 .PHONY: ssh.controller ssh.worker
 ssh.controller ssh.worker:
 	@[ -n '$(SSH_CONNECT)' ] || { echo No machine found.; exit 1; }
-	$(SSH) -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $(SSH_CONNECT)
+	$(SSH) -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $(SSH_CONNECT) $(SSH_CMDLINE)
 
 profiles/$(PROFILE):
 	mkdir -p -- '$@'

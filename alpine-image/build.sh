@@ -31,14 +31,20 @@ sed -Ei -e 's/^(tty\d+:)/# \1/' /etc/inittab # Disable TTYs
 
 step 'Enable services'
 rc-update add machine-id boot
-rc-update add sshd boot
+# rc-update add sshd boot
 rc-update add net.lo boot
 rc-update add net.eth0 boot
 rc-update add termencoding boot
-rc-update add qemu-guest-agent boot
+rc-update add qemu-guest-agent default
 
+# https://gitlab.alpinelinux.org/alpine/cloud/tiny-cloud/-/blob/3.0.0_rc2/README.md#installation
 step 'Setup cloud-init'
-setup-cloud-init
+# This is required as tiny-cloud doesn't support creating arbitrary users at the moment
+sed -Ei -e 's/^[# ](CLOUD_USER)=.*/\1=k0s/' /etc/tiny-cloud.conf
+# This should run at sysinit time, but fails with "Read-only file system" errors ...
+rc-update add tiny-cloud-early boot
+rc-update add tiny-cloud default
+rc-update add tiny-cloud-final default
 
 step 'Modify defaults'
 passwd -l root          # prevent root logins
