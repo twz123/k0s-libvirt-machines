@@ -11,8 +11,11 @@ resource "libvirt_volume" "boot" {
 resource "libvirt_domain" "machine" {
   name = var.machine_name
 
-  memory     = var.machine_memory
-  vcpu       = var.machine_num_cpus
+  cpu { mode = "host-passthrough" }
+
+  memory = var.machine_memory
+  vcpu   = var.machine_num_cpus
+
   qemu_agent = true
 
   network_interface {
