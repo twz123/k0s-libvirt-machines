@@ -51,10 +51,6 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
           && modprobe -a -- $(cat /etc/modules)
       EOF
       ,
-      # https://github.com/k0sproject/k0sctl/issues/334#issuecomment-1047694966
-      "echo PubkeyAcceptedAlgorithms +ssh-rsa >>/etc/ssh/sshd_config && /etc/init.d/sshd restart",
-      "rc-update add cgroups boot",
-      "rc-update add sshd boot",
     ], var.cloudinit_extra_runcmds)
 
     # apply network config on every boot

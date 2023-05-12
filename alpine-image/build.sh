@@ -30,6 +30,8 @@ sed -Ei -e 's/^(tty\d+:)/# \1/' /etc/inittab # Disable TTYs
 
 step 'Enable services'
 rc-update add machine-id boot
+rc-update add cgroups boot
+rc-update add sshd boot
 rc-update add net.lo boot
 rc-update add net.eth0 boot
 rc-update add termencoding boot
