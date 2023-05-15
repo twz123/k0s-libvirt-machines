@@ -8,21 +8,33 @@ module "loadbalancer" {
   libvirt_base_volume_id     = libvirt_volume.base.id
   libvirt_network_id         = libvirt_network.network.id
 
-  machine_name       = "${var.resource_name_prefix}lb"
-  machine_dns_domain = libvirt_network.network.domain
-
+  machine_name     = "${var.resource_name_prefix}lb"
   machine_num_cpus = 1
   machine_memory   = 128
+  machine_user     = var.machine_user
 
-  machine_user           = var.machine_user
-  machine_ssh_public_key = chomp(tls_private_key.ssh.public_key_openssh)
+  cloud_init_id = module.loadbalancer_cloud_init.0.id
+}
 
-  cloudinit_extra_runcmds = [
+module "loadbalancer_cloud_init" {
+  source = "./modules/cloud-init"
+
+  count = var.loadbalancer_enabled ? 1 : 0
+
+  libvirt_resource_pool_name = libvirt_pool.resource_pool.name
+
+  hostname   = "${var.resource_name_prefix}lb"
+  dns_domain = libvirt_network.network.domain
+
+  cloud_user                    = var.machine_user
+  cloud_user_authorized_ssh_key = chomp(tls_private_key.ssh.public_key_openssh)
+
+  extra_runcmds = [
     "rc-update add haproxy boot",
     "/etc/init.d/haproxy start",
   ]
 
-  cloudinit_extra_user_data = {
+  extra_user_data = {
     write_files = [{
       path = "/etc/haproxy/haproxy.cfg",
       content = templatefile("${path.module}/haproxy.cfg.tftpl", {

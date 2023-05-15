@@ -5,29 +5,29 @@ resource "random_password" "password" {
 }
 
 # Assemble the cloud-init iso
-resource "libvirt_cloudinit_disk" "cloudinit" {
-  name = "${var.machine_name}-cloudinit.iso"
+resource "libvirt_cloudinit_disk" "cloud_init" {
+  name = "${var.hostname}-cloud-init.iso"
   pool = var.libvirt_resource_pool_name
 
-  user_data = format("#cloud-config\n%s", jsonencode(merge(var.cloudinit_extra_user_data, {
-    hostname         = var.machine_name
-    fqdn             = join(".", [var.machine_name, var.machine_dns_domain])
+  user_data = format("#cloud-config\n%s", jsonencode(merge(var.extra_user_data, {
+    hostname         = var.hostname
+    fqdn             = join(".", [var.hostname, var.dns_domain])
     manage_etc_hosts = true
 
     users = [{
-      name                = var.machine_user
+      name                = var.cloud_user
       sudo                = "ALL=(ALL) NOPASSWD:ALL"
-      home                = "/home/${var.machine_user}"
+      home                = "/home/${var.cloud_user}"
       shell               = "/bin/sh"
       lock_passwd         = true
-      ssh-authorized-keys = [var.machine_ssh_public_key]
+      ssh-authorized-keys = [var.cloud_user_authorized_ssh_key]
     }]
 
     ssh_pwauth   = false
     disable_root = true
 
     chpasswd = {
-      list   = join(":", [var.machine_user, random_password.password.result])
+      list   = join(":", [var.cloud_user, random_password.password.result])
       expire = false
     }
 
@@ -51,7 +51,7 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
           && modprobe -a -- $(cat /etc/modules)
       EOF
       ,
-    ], var.cloudinit_extra_runcmds)
+    ], var.extra_runcmds)
 
     # apply network config on every boot
     updates = { network = { when = ["boot"], }, }

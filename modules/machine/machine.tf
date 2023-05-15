@@ -24,7 +24,7 @@ resource "libvirt_domain" "machine" {
     hostname       = var.machine_name
   }
 
-  cloudinit = libvirt_cloudinit_disk.cloudinit.id
+  cloudinit = var.cloud_init_id
 
   disk {
     volume_id = libvirt_volume.boot.id

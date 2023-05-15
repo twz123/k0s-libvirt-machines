@@ -20,12 +20,7 @@ variable "libvirt_network_id" {
 
 variable "machine_name" {
   type        = string
-  description = "The virtual machine's name"
-}
-
-variable "machine_dns_domain" {
-  type        = string
-  description = "The virtual machine's DNS domain name"
+  description = "The virtual machine's name in libvirt"
 }
 
 variable "machine_num_cpus" {
@@ -43,29 +38,8 @@ variable "machine_user" {
   description = "Username used to SSH into the virtual machine"
 }
 
-variable "machine_ssh_public_key" {
+
+variable "cloud_init_id" {
   type        = string
-  description = "SSH public key used to SSH into the virtual machine"
-}
-
-variable "cloudinit_extra_runcmds" {
-  type        = list(string)
-  description = "xoxo"
-  default     = []
-
-  validation {
-    condition     = var.cloudinit_extra_runcmds != null
-    error_message = "cloud-init extra runcmds cannot be null."
-  }
-}
-
-
-variable "cloudinit_extra_user_data" {
-  type    = map(any)
-  default = {}
-
-  validation {
-    condition     = var.cloudinit_extra_user_data != null
-    error_message = "cloud-init extra data cannot be null."
-  }
+  description = "ID of the cloud-init ISO"
 }
