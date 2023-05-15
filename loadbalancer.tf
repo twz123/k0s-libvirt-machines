@@ -11,7 +11,6 @@ module "loadbalancer" {
   machine_name     = "${var.resource_name_prefix}lb"
   machine_num_cpus = 1
   machine_memory   = 128
-  machine_user     = var.machine_user
 
   cloud_init_id = module.loadbalancer_cloud_init.0.id
 }

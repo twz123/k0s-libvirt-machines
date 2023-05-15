@@ -23,6 +23,11 @@ variable "machine_name" {
   description = "The virtual machine's name in libvirt"
 }
 
+variable "machine_dns_domain" {
+  type        = string
+  description = "The DNS domain of the machine. Used to construct the FQDN together with the machine's name."
+}
+
 variable "machine_num_cpus" {
   type        = number
   description = "The number CPUs allocated to the virtual machine"
@@ -33,7 +38,12 @@ variable "machine_memory" {
   description = "The amount of RAM (in MiB) allocated to the virtual machine"
 }
 
-variable "cloud_init_id" {
+variable "cloud_user" {
   type        = string
-  description = "ID of the cloud-init ISO"
+  description = "The name of the user that's to be provisioned for SSH access on the machine."
+}
+
+variable "cloud_user_authorized_ssh_key" {
+  type        = string
+  description = "The SSH key that's authorized to connect to the user provisined by cloud-init."
 }

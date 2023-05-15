@@ -9,5 +9,5 @@ output "info" {
     ])
   }
 
-  description = "Virtual machine info containing it's name and IP addresses"
+  description = "Virtual machine info containing its name and IP addresses"
 }
