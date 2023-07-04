@@ -49,7 +49,7 @@ variable "machine_ssh_public_key" {
 }
 
 variable "cloudinit_extra_runcmds" {
-  type        = list(string)
+  type        = list(list(string))
   description = "xoxo"
   default     = []
 

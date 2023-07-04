@@ -69,7 +69,22 @@ $(foreach cmd,$(TF_STATE_CMDS),$(eval $(cmd): .tf.$(cmd).$(PROFILE)))
 Rocky-9-GenericCloud.latest.x86_64.qcow2:
 	truncate -s0 -- '$@'
 	chattr +C -- '$@'
-	curl -Lo '$@' -- 'https://download.rockylinux.org/pub/rocky/9.1/images/x86_64/$@'
+	curl -Lo '$@' -- 'https://dl.rockylinux.org/vault/rocky/9.1/images/x86_64/$@'
+
+OL8U8_x86_64-kvm-b198.qcow2:
+	truncate -s0 -- '$@'
+	chattr +C -- '$@'
+	curl -Lo '$@' -- 'https://yum.oracle.com/templates/OracleLinux/OL8/u8/x86_64/$(@:%.qcow2=%.qcow)'
+
+OL9U2_x86_64-kvm-b197.qcow2:
+	truncate -s0 -- '$@'
+	chattr +C -- '$@'
+	curl -Lo '$@' -- 'https://yum.oracle.com/templates/OracleLinux/OL9/u2/x86_64/$(@:%.qcow2=%.qcow)'
+
+CentOS-Stream-GenericCloud-8-latest.x86_64.qcow2:
+	truncate -s0 -- '$@'
+	chattr +C -- '$@'
+	curl -Lo '$@' -- 'https://cloud.centos.org/centos/8-stream/x86_64/images/$@'
 
 ssh.%: ID ?= 0
 ssh.%: SSH_CONNECT ?= $(shell $(MAKE) -s output -- -json | $(JQ) -r '@sh "-i \(.ssh.value.key_file) \(.ssh.value.user)@\((.machines.value[] | select(.name | endswith("$(patsubst .%,%,$(suffix $@))-$(ID)")).ipv4))"')

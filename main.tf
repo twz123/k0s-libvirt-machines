@@ -74,6 +74,19 @@ module "controllers" {
 
   machine_user           = var.machine_user
   machine_ssh_public_key = chomp(tls_private_key.ssh.public_key_openssh)
+
+  cloudinit_extra_user_data = {
+    write_files = [{
+      path    = "/etc/firewalld/services/k0s-controller.xml",
+      content = file("${path.module}/k0s-controller.firewalld-service.xml"),
+    }]
+  }
+
+  cloudinit_extra_runcmds = [
+    ["firewall-offline-cmd", "--add-service=k0s-controller"],
+    # ["firewall-offline-cmd", "--add-source=10.244.0.0/16"],
+    ["systemctl", "reload", "firewalld.service"],
+  ]
 }
 
 module "workers" {
@@ -94,6 +107,20 @@ module "workers" {
 
   machine_user           = var.machine_user
   machine_ssh_public_key = chomp(tls_private_key.ssh.public_key_openssh)
+
+  cloudinit_extra_user_data = {
+    write_files = [{
+      path    = "/etc/firewalld/services/k0s-worker.xml",
+      content = file("${path.module}/k0s-worker.firewalld-service.xml"),
+    }]
+  }
+
+  cloudinit_extra_runcmds = [
+    ["firewall-offline-cmd", "--add-service=k0s-worker"],
+    #["firewall-offline-cmd", "--add-source=10.244.0.0/16"],
+    ["firewall-offline-cmd", "--add-masquerade"],
+    ["systemctl", "reload", "firewalld.service"],
+  ]
 }
 
 module "loadbalancer" {
@@ -116,8 +143,8 @@ module "loadbalancer" {
   machine_ssh_public_key = chomp(tls_private_key.ssh.public_key_openssh)
 
   cloudinit_extra_runcmds = [
-    "rc-update add haproxy boot",
-    "/etc/init.d/haproxy start",
+    ["rc-update", "add", "haproxy", "boot"],
+    ["/etc/init.d/haproxy", "start"],
   ]
 
   cloudinit_extra_user_data = {
