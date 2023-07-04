@@ -97,22 +97,33 @@ resource "null_resource" "k0sctl_apply" {
     }
 
     command = <<-EOF
-      printf %s "$K0SCTL_CONFIG" | env SSH_KNOWN_HOSTS= "$K0SCTL_BINARY" apply --disable-telemetry --disable-upgrade-check -c -
+      printf %s "$K0SCTL_CONFIG" | env -u SSH_AUTH_SOCK SSH_KNOWN_HOSTS='' "$K0SCTL_BINARY" apply --disable-telemetry --disable-upgrade-check -c -
       EOF
   }
 }
 
 data "external" "k0s_kubeconfig" {
-  # Dirty hack to get the kubeconfig into Terrafrom. Requires jq.
-
   count = var.k0sctl_binary == null ? 0 : 1
+
   query = {
     k0sctl_config = jsonencode(local.k0sctl_config)
   }
 
   program = [
-    "/usr/bin/env", "sh", "-ec",
-    "jq '.k0sctl_config | fromjson' | '${var.k0sctl_binary}' kubeconfig --disable-telemetry -c - | jq --raw-input --slurp '{kubeconfig: .}'",
+    "env", "sh", "-ec",
+    <<-EOS
+      jq '.k0sctl_config | fromjson' |
+        { env -u SSH_AUTH_SOCK SSH_KNOWN_HOSTS='' "$1" kubeconfig --disable-telemetry -c - || echo ~~~FAIL; } |
+        jq --raw-input --slurp "$2"
+    EOS
+    , "--",
+    var.k0sctl_binary, <<-EOS
+      if endswith("~~~FAIL\n") then
+        error("Failed to generate kubeconfig!")
+      else
+        {kubeconfig: .}
+      end
+    EOS
   ]
 
   depends_on = [null_resource.k0sctl_apply]
