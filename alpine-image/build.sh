@@ -22,6 +22,7 @@ ln -s networking /etc/init.d/net.eth0
 
 step 'Adjust init system'
 sed -Ei \
+  -e 's/^[# ](rc_cgroup_mode)=.*/\1=unified/' \
   -e 's/^[# ](rc_depend_strict)=.*/\1=NO/' \
   -e 's/^[# ](rc_logger)=.*/\1=YES/' \
   -e 's/^[# ](unicode)=.*/\1=YES/' \
@@ -30,7 +31,6 @@ sed -Ei -e 's/^(tty\d+:)/# \1/' /etc/inittab # Disable TTYs
 
 step 'Enable services'
 rc-update add machine-id boot
-rc-update add cgroups boot
 rc-update add sshd boot
 rc-update add net.lo boot
 rc-update add net.eth0 boot
