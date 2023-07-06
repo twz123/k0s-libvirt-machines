@@ -117,7 +117,7 @@ profiles/$(PROFILE)/profile.tfvars: | profiles/$(PROFILE)
 	    ; echo \
 	    ; echo '# IPv4 CIDR of the libvirt network of the virtual machines.' \
 	    ; u4() { od -N1 -tu4 -An < /dev/urandom | tr -d [:space:]; } \
-	    ; printf 'libvirt_network_ipv4_cidr = "10.%s.%s.0/24"\n' "$$(u4)" "$$(u4)" \
+	    ; printf 'libvirt_network_ipv4_cidr = "172.%s.%s.0/24"\n' "$$(($$(u4) % 8 + 24))" "$$(u4)" \
 	    ; echo \
 	    ; echo '# The k0s version to deploy on the machines. May be an exact version, "stable" or "latest".' \
 	    ; echo 'k0s_version = "stable"' \
