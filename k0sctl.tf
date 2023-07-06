@@ -33,7 +33,7 @@ locals {
     metadata   = { name = "k0s-cluster" }
     spec = {
       k0s = {
-        version       = local.use_remote_k0s_version ? chomp(data.http.k0s_version.0.body) : var.k0s_version
+        version       = local.use_remote_k0s_version ? chomp(data.http.k0s_version.0.response_body) : var.k0s_version
         dynamicConfig = var.k0s_dynamic_config
         config = { spec = merge(
           { telemetry = { enabled = false, }, },
