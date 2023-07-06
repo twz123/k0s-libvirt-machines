@@ -231,6 +231,18 @@ variable "k0sctl_airgap_image_bundle" {
   default     = null
 }
 
+variable "k0sctl_additional_controller_files" {
+  type = list(object({
+    src    = string
+    dstDir = string
+    name   = string
+    perm   = string
+  }))
+  nullable    = false
+  description = "Additional files to be copied over to controller nodes."
+  default     = []
+}
+
 variable "k0sctl_k0s_install_flags" {
   type        = list(string)
   description = "Install flags to be passed to k0s."

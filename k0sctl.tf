@@ -61,21 +61,22 @@ locals {
             machine.controller_enabled ? var.k0sctl_k0s_controller_install_flags : [],
             machine.worker_enabled ? var.k0sctl_k0s_worker_install_flags : [],
           )
-          uploadBinary = true
+          uploadBinary = true,
+          files = concat(
+            machine.worker_enabled && var.k0sctl_airgap_image_bundle != null ? [
+              {
+                src    = var.k0sctl_airgap_image_bundle
+                dstDir = "/var/lib/k0s/images/"
+                name   = "bundle-file"
+                perm   = "0755"
+              }
+            ] : [],
+            machine.controller_enabled ? var.k0sctl_additional_controller_files : [],
+          )
         },
         var.k0sctl_k0s_binary == null ? {} : {
           k0sBinaryPath = var.k0sctl_k0s_binary
         },
-        machine.worker_enabled && var.k0sctl_airgap_image_bundle != null ? {
-          files = [
-            {
-              src    = var.k0sctl_airgap_image_bundle
-              dstDir = "/var/lib/k0s/images/"
-              name   = "bundle-file"
-              perm   = "0755"
-            }
-          ]
-        } : {},
       )]
     }
   }

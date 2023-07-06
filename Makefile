@@ -129,6 +129,8 @@ profiles/$(PROFILE)/profile.tfvars: | profiles/$(PROFILE)
 	    ; echo 'k0sctl_k0s_binary = null' \
 	    ; echo '# Path to the airgap image bundle to be copied to the worker-enabled nodes, or null.' \
 	    ; echo 'k0sctl_airgap_image_bundle = null' \
+	    ; echo '# Additional files to be copied over to controller nodes.' \
+	    ; echo 'k0sctl_additional_controller_files = []' \
 	    ; echo '# Install flags to be passed to k0s.' \
 	    ; echo 'k0sctl_k0s_install_flags = []' \
 	    ; echo '# Install flags to be passed to k0s controllers.' \
