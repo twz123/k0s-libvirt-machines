@@ -201,7 +201,10 @@ variable "k0s_config_spec" {
         })),
       })),
     })),
-    images = optional(map(map(map(string)))),
+    images = optional(map(map(object({
+      image   = optional(string),
+      version = optional(string),
+    })))),
   })
   description = "The k0s config spec"
   default     = null
