@@ -66,6 +66,11 @@ $(foreach cmd,$(TF_STATE_CMDS),$(eval $(cmd): .tf.$(cmd).$(PROFILE)))
 .alpine-image:
 	$(MAKE) -C alpine-image image.qcow2
 
+Rocky-8-GenericCloud-8.5-20211114.2.x86_64.qcow2:
+	truncate -s0 -- '$@'
+	chattr +C -- '$@'
+	curl -Lo '$@' -- 'https://dl.rockylinux.org/vault/rocky/8.5/images/$@'
+
 Rocky-9-GenericCloud.latest.x86_64.qcow2:
 	truncate -s0 -- '$@'
 	chattr +C -- '$@'
@@ -85,6 +90,11 @@ CentOS-Stream-GenericCloud-8-latest.x86_64.qcow2:
 	truncate -s0 -- '$@'
 	chattr +C -- '$@'
 	curl -Lo '$@' -- 'https://cloud.centos.org/centos/8-stream/x86_64/images/$@'
+
+debian-11-genericcloud-amd64.qcow2:
+	truncate -s0 -- '$@'
+	chattr +C -- '$@'
+	curl -Lo '$@' -- 'https://cloud.debian.org/images/cloud/bullseye/latest/$@'
 
 ssh.%: ID ?= 0
 ssh.%: SSH_CONNECT ?= $(shell $(MAKE) -s output -- -json | $(JQ) -r '@sh "-i \(.ssh.value.key_file) \(.ssh.value.user)@\((.machines.value[] | select(.name | endswith("$(patsubst .%,%,$(suffix $@))-$(ID)")).ipv4))"')
