@@ -120,7 +120,7 @@ data "external" "k0s_kubeconfig" {
     , "--",
     var.k0sctl_binary, <<-EOS
       if endswith("~~~FAIL\n") then
-        error("Failed to generate kubeconfig!")
+        error("Failed to generate kubeconfig!\n" + .)
       else
         {kubeconfig: .}
       end
