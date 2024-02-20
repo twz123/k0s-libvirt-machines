@@ -39,6 +39,10 @@ rc-update add qemu-guest-agent boot
 
 step 'Setup cloud-init'
 setup-cloud-init
+# Only use NoCloud
+echo "datasource_list: ['NoCloud']" > /etc/cloud/cloud.cfg.d/01-datasource.cfg
+# otherwise cloud-init's "mount -t auto" will fail to find the appropriate fs for the cloud-init disk
+echo isofs >>/etc/modules
 
 step 'Modify defaults'
 passwd -l root          # prevent root logins
