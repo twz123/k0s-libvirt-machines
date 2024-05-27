@@ -205,6 +205,23 @@ variable "k0s_config_spec" {
       image   = optional(string),
       version = optional(string),
     })))),
+    storage = optional(object({
+      type = optional(string),
+      etcd = optional(object({
+        peerAddress = string,
+        extraArgs   = map(string),
+        externalCluster = optional(object({
+          endpoints      = optional(string),
+          etcdPrefix     = optional(string),
+          caFile         = optional(string),
+          clientCertFile = optional(string),
+          clientKeyFile  = optional(string),
+        })),
+      })),
+      kine = optional(object({
+        dataSource = optional(string),
+      })),
+    })),
   })
   description = "The k0s config spec"
   default     = null
