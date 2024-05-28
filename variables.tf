@@ -222,6 +222,10 @@ variable "k0s_config_spec" {
         dataSource = optional(string),
       })),
     })),
+    workerProfiles = optional(list(object({
+      name   = string,
+      values = any,
+    }))),
   })
   description = "The k0s config spec"
   default     = null
