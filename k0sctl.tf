@@ -73,6 +73,16 @@ locals {
             ] : [],
             machine.controller_enabled ? var.k0sctl_additional_controller_files : [],
           )
+          hooks = { apply = {
+            before = concat(
+              machine.controller_enabled ? coalesce(var.k0sctl_k0s_controller_hooks.apply.before, []) : [],
+              machine.worker_enabled ? coalesce(var.k0sctl_k0s_worker_hooks.apply.before, []) : [],
+            ),
+            after = concat(
+              machine.controller_enabled ? coalesce(var.k0sctl_k0s_controller_hooks.apply.after, []) : [],
+              machine.worker_enabled ? coalesce(var.k0sctl_k0s_worker_hooks.apply.after, []) : [],
+            ),
+          } },
         },
         var.k0sctl_k0s_binary == null ? {} : {
           k0sBinaryPath = var.k0sctl_k0s_binary

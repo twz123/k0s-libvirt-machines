@@ -135,8 +135,12 @@ profiles/$(PROFILE)/profile.tfvars: | profiles/$(PROFILE)
 	    ; echo 'k0sctl_k0s_install_flags = []' \
 	    ; echo '# Install flags to be passed to k0s controllers.' \
 	    ; echo 'k0sctl_k0s_controller_install_flags = []' \
+	    ; echo '# K0sctl hooks for k0s controllers.' \
+	    ; echo 'k0sctl_k0s_controller_hooks = {}' \
 	    ; echo '# Install flags to be passed to k0s workers.' \
 	    ; echo 'k0sctl_k0s_worker_install_flags = []' \
+	    ; echo '# K0sctl hooks for k0s workers.' \
+	    ; echo 'k0sctl_k0s_worker_hooks = {}' \
 	    ; echo '' \
 	    ; echo '# Whether k0s on the controllers should also schedule workloads.' \
 	    ; echo 'controller_k0s_enable_worker = false' \

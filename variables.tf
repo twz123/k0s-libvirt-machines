@@ -289,6 +289,17 @@ variable "k0sctl_k0s_controller_install_flags" {
   }
 }
 
+variable "k0sctl_k0s_controller_hooks" {
+  type = object({
+    apply = optional(object({
+      before = optional(list(string))
+      after  = optional(list(string))
+    }))
+  })
+  description = "K0sctl hooks for k0s controllers."
+  default     = {}
+}
+
 variable "k0sctl_k0s_worker_install_flags" {
   type        = list(string)
   description = "Install flags to be passed to k0s workers."
@@ -298,4 +309,15 @@ variable "k0sctl_k0s_worker_install_flags" {
     condition     = var.k0sctl_k0s_worker_install_flags != null
     error_message = "K0s worker install flags cannot be null."
   }
+}
+
+variable "k0sctl_k0s_worker_hooks" {
+  type = object({
+    apply = optional(object({
+      before = optional(list(string))
+      after  = optional(list(string))
+    }))
+  })
+  description = "K0sctl hooks for k0s workers."
+  default     = {}
 }
