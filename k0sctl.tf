@@ -75,12 +75,12 @@ locals {
           )
           hooks = { apply = {
             before = concat(
-              machine.controller_enabled ? coalesce(var.k0sctl_k0s_controller_hooks.apply.before, []) : [],
-              machine.worker_enabled ? coalesce(var.k0sctl_k0s_worker_hooks.apply.before, []) : [],
+              machine.controller_enabled ? try(var.k0sctl_k0s_controller_hooks.apply.before, []) : [],
+              machine.worker_enabled ? try(var.k0sctl_k0s_worker_hooks.apply.before, []) : [],
             ),
             after = concat(
-              machine.controller_enabled ? coalesce(var.k0sctl_k0s_controller_hooks.apply.after, []) : [],
-              machine.worker_enabled ? coalesce(var.k0sctl_k0s_worker_hooks.apply.after, []) : [],
+              machine.controller_enabled ? try(var.k0sctl_k0s_controller_hooks.apply.after, []) : [],
+              machine.worker_enabled ? try(var.k0sctl_k0s_worker_hooks.apply.after, []) : [],
             ),
           } },
         },
