@@ -1,8 +1,8 @@
 # k0s-libvirt-machines
 
-Use [Terraform] and [libvirt] to bring up Virtual machines for [k0s].
+Use [OpenTofu] and [libvirt] to bring up Virtual machines for [k0s].
 
-[Terraform]: https://www.terraform.io/
+[OpenTofu]: https://opentofu.org/
 [libvirt]: https://libvirt.org/
 [k0s]: https://k0sproject.io/
 

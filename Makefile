@@ -1,7 +1,7 @@
 DOCKER ?= docker
 JQ ?= jq
 SSH ?= ssh
-TF ?= terraform
+TF ?= tofu
 
 PROFILE ?= k0s
 
