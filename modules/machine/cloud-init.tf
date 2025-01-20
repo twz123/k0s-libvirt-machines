@@ -32,8 +32,19 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
     }
 
     runcmd = concat([
+      <<-EOF
+        case "$(. /etc/os-release 2>/dev/null && echo "$ID_LIKE")" in
+        debian | 'debian '* | *' debian' | *' debian '*)
+          DEBIAN_FRONTEND=noninteractive apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends qemu-guest-agent
+          systemctl start qemu-guest-agent
+          ;;
+        esac
+      EOF,
+
       # https://github.com/kubernetes/kubernetes/issues/108877
       <<-EOF
+        mkdir /etc/modules-load.d
         {
           # for kube-proxy
           echo ip_tables
@@ -47,8 +58,8 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
           # echo ip_vs_wrr
           # echo ip_vs_sh
           # echo nf_conntrack
-        } >>/etc/modules \
-          && modprobe -a -- $(cat /etc/modules)
+        } >>/etc/modules-load.d/k0s.conf \
+          && modprobe -a -- $(cat /etc/modules-load.d/k0s.conf)
       EOF
       ,
     ], var.cloudinit_extra_runcmds)
