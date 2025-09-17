@@ -71,8 +71,5 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
     final_message = "The system is finally up, after $UPTIME seconds"
   })))
 
-  network_config = jsonencode({
-    version   = 2
-    ethernets = { eth0 = { dhcp4 = true, dhcp6 = true, }, }
-  })
+  network_config = var.cloudinit_network_config == null ? null : jsonencode(var.cloudinit_network_config)
 }

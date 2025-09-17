@@ -59,7 +59,6 @@ variable "cloudinit_extra_runcmds" {
   }
 }
 
-
 variable "cloudinit_extra_user_data" {
   type    = map(any)
   default = {}
@@ -68,4 +67,9 @@ variable "cloudinit_extra_user_data" {
     condition     = var.cloudinit_extra_user_data != null
     error_message = "cloud-init extra data cannot be null."
   }
+}
+
+variable "cloudinit_network_config" {
+  type    = any
+  default = null
 }

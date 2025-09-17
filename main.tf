@@ -141,4 +141,9 @@ module "loadbalancer" {
       }),
     }]
   }
+
+  cloudinit_network_config = startswith(var.machine_image_source, "alpine-image/") ? {
+    version   = 2
+    ethernets = { eth0 = { dhcp4 = true, dhcp6 = true, }, }
+  } : null
 }
