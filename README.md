@@ -10,9 +10,9 @@ Use [OpenTofu] and [libvirt] to bring up Virtual machines for [k0s].
 
 Stuff which inspired this (a lot):
 
-* [https://github.com/MusicDin/terraform-kvm-kubespray]
-* [https://github.com/fabianlee/terraform-libvirt-ubuntu-examples]
-* [https://github.com/alpinelinux/alpine-make-vm-image]
+* <https://github.com/MusicDin/terraform-kvm-kubespray>
+* <https://github.com/fabianlee/terraform-libvirt-ubuntu-examples>
+* <https://github.com/alpinelinux/alpine-make-vm-image>
 
 ## License
 
