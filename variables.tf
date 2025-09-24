@@ -191,6 +191,9 @@ variable "k0s_config_spec" {
       calico      = optional(map(string)),
       podCIDR     = optional(string),
       serviceCIDR = optional(string),
+      kubeProxy = optional(object({
+        mode = optional(string),
+      })),
       nodeLocalLoadBalancing = optional(object({
         enabled = optional(bool),
         type    = optional(string),
