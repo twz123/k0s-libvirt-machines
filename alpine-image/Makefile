@@ -1,7 +1,7 @@
 SUDO = sudo
 QEMU_IMG = qemu-img
 
-alpine.branch = v3.21
+alpine.branch = v3.22
 alpine-make-vm-image.url = https://raw.githubusercontent.com/alpinelinux/alpine-make-vm-image/v0.13.3/alpine-make-vm-image
 alpine-make-vm-image.sha256 = 8c3e6c537aff8649238ff9928fe632953c7948b8c4941d8eb3c2e93abe4cb53e
 image.qcow2.size = 8G
