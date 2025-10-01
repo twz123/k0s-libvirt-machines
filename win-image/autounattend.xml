@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<unattend xmlns="urn:schemas-microsoft-com:unattend"
+  xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <!--
+    WINDOWS PE PASS: This runs before installation proper. Accept the license,
+    wipe Disk 0, create EFI/MSR/Primary partitions, and tell Setup to install
+    image index 1 into the Primary partition.
+   -->
+  <settings pass="windowsPE">
+    <!-- Language for WinPE phase -->
+    <component name="Microsoft-Windows-International-Core-WinPE"
+      processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35"
+      language="neutral" versionScope="nonSxS">
+      <InputLocale>en-US</InputLocale>
+      <SystemLocale>en-US</SystemLocale>
+      <UILanguage>en-US</UILanguage>
+      <UserLocale>en-US</UserLocale>
+    </component>
+
+    <component name="Microsoft-Windows-Setup"
+      processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35"
+      language="neutral" versionScope="nonSxS">
+
+      <!-- Accept the EULA without prompting -->
+      <UserData>
+        <AcceptEula>true</AcceptEula>
+      </UserData>
+
+      <DiskConfiguration>
+        <Disk wcm:action="add" wcm:keyValue="0">
+          <DiskID>0</DiskID>
+          <WillWipeDisk>true</WillWipeDisk>
+
+          <!-- GPT layout: ESP (260 MB), MSR (16 MB), Primary (rest) -->
+          <CreatePartitions>
+            <!-- EFI system partition -->
+            <CreatePartition wcm:action="add">
+              <Order>1</Order>
+              <Type>EFI</Type>
+              <Size>256</Size>
+            </CreatePartition>
+            <!-- Microsoft reserved partition -->
+            <CreatePartition wcm:action="add">
+              <Order>2</Order>
+              <Type>MSR</Type>
+              <Size>16</Size>
+            </CreatePartition>
+            <!-- Main Windows partition (fills the rest of the disk) -->
+            <CreatePartition wcm:action="add">
+              <Order>3</Order>
+              <Type>Primary</Type>
+              <Extend>true</Extend>
+            </CreatePartition>
+          </CreatePartitions>
+
+          <!-- Format the partitions -->
+          <ModifyPartitions>
+            <!-- EFI partition -->
+            <ModifyPartition wcm:action="add">
+              <Order>1</Order>
+              <PartitionID>1</PartitionID>
+              <Label>System</Label>
+              <Format>FAT32</Format>
+            </ModifyPartition>
+            <!-- MSR needs no formatting -->
+            <ModifyPartition wcm:action="add">
+              <Order>2</Order>
+              <PartitionID>2</PartitionID>
+            </ModifyPartition>
+            <!-- Windows partition -->
+            <ModifyPartition wcm:action="add">
+              <Order>3</Order>
+              <PartitionID>3</PartitionID>
+              <Label>Windows</Label>
+              <Format>NTFS</Format>
+              <Letter>C</Letter>
+            </ModifyPartition>
+          </ModifyPartitions>
+        </Disk>
+      </DiskConfiguration>
+
+      <!-- Install the OS image -->
+      <ImageInstall>
+        <OSImage>
+          <InstallTo>
+            <!-- Target is disk 0, partition 3 (the Primary) -->
+            <DiskID>0</DiskID>
+            <PartitionID>3</PartitionID>
+          </InstallTo>
+          <InstallFrom>
+            <MetaData wcm:action="add">
+              <Key>/IMAGE/NAME</Key>
+              <!--
+                sudo mount -t udf -o loop <path-to-iso> /mnt/iso
+                wimlib-imagex info /mnt/iso/sources/install.wim
+               -->
+              <Value>Windows Server 2025 SERVERSTANDARDCORE</Value>
+            </MetaData>
+          </InstallFrom>
+          <WillShowUI>OnError</WillShowUI>
+        </OSImage>
+      </ImageInstall>
+    </component>
+
+    <component name="Microsoft-Windows-PnpCustomizationsWinPE" publicKeyToken="31bf3856ad364e35"
+      language="neutral" versionScope="nonSxS" processorArchitecture="amd64"
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+      <!-- Check installed drivers with: dism /online /Get-Drivers /Format:Table -->
+      <DriverPaths>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="1">
+          <Path>E:\qemufwcfg\2k25\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="2">
+          <Path>E:\vioinput\2k25\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="3">
+          <Path>E:\vioscsi\2k25\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="4">
+          <Path>E:\viostor\2k25\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="5">
+          <Path>E:\vioserial\2k25\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="6">
+          <Path>E:\qxldod\2k25\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="7">
+          <Path>E:\amd64\2k25</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="8">
+          <Path>E:\viogpudo\2k25\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="9">
+          <Path>E:\viorng\2k25\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="10">
+          <Path>E:\NetKVM\2k25\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="11">
+          <Path>E:\viofs\2k25\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="12">
+          <Path>E:\Balloon\2k25\amd64</Path>
+        </PathAndCredentials>
+      </DriverPaths>
+    </component>
+  </settings>
+
+  <!--
+    SPECIALIZE PASS: Runs after the OS image is laid down but before OOBE. Set
+    the built-in Administrator password here.
+   -->
+  <settings pass="specialize">
+    <!-- <component name="Microsoft-Windows-Shell-Setup"
+      processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35"
+      language="neutral" versionScope="nonSxS">
+      <UserAccounts>
+        <AdministratorPassword>
+          <! Must meet complexity rules! >
+          <Value>ComplexPassw0rd!ChangeMe</Value>
+          <PlainText>true</PlainText>
+        </AdministratorPassword>
+      </UserAccounts>
+    </component> -->
+
+    <component name="Microsoft-Windows-Deployment"
+      processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35"
+      language="neutral" versionScope="nonSxS">
+      <!-- The following things run as LocalSystem -->
+      <RunSynchronous>
+        <RunSynchronousCommand wcm:action="add">
+          <Order>1</Order>
+          <Description>Call specialize.ps1</Description>
+          <Path>powershell.exe -NoProfile -ExecutionPolicy Bypass -File F:\specialize.ps1</Path>
+          <WillReboot>OnRequest</WillReboot>
+        </RunSynchronousCommand>
+      </RunSynchronous>
+    </component>
+  </settings>
+
+  <!--
+    OOBE PASS: Runs on first boot. Skip all the interactive Out-of-Box wizard
+    screens so it boots straight to the logon screen.
+  -->
+  <settings pass="oobeSystem">
+    <component name="Microsoft-Windows-Shell-Setup"
+      processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35"
+      language="neutral" versionScope="nonSxS">
+      <OOBE>
+        <!-- Suppress EULA prompt -->
+        <HideEULAPage>true</HideEULAPage>
+        <!-- Skip user account creation -->
+        <SkipUserOOBE>true</SkipUserOOBE>
+        <!-- Skip machine setup screens -->
+        <SkipMachineOOBE>true</SkipMachineOOBE>
+      </OOBE>
+    </component>
+  </settings>
+
+</unattend>
