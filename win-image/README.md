@@ -10,7 +10,7 @@ Prerequisites:
 Select and download the Windows 2025 Server ISO from the [Windows Server 2025
 download page][2025-dl] in the Microsoft Evaluation Center. Place this as
 `server-2025.iso` in this directory. Run `make`. The resulting disk image should
-be located at `server-2025/disk.qemu2`. Note that the make target won't block
+be located at `server-2025/disk.qcow2`. Note that the make target won't block
 and you have to power off the QEMU VM manually after the installation finished.
 
 [Quickemu]: https://github.com/quickemu-project/quickemu
