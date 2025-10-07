@@ -79,7 +79,8 @@ for ($attempt = 1; $true; $attempt++) {
   Start-Sleep -Seconds 1
 }
 
-Install-WindowsFeature -Name Hyper-V, Containers -IncludeAllSubFeature
+#Get-WindowsFeature -Name Containers, Hyper-V
+# Install-WindowsFeature -Name Hyper-V, Containers -IncludeAllSubFeature
 
 Write-Information 'Done'
 Stop-Transcript
