@@ -48,12 +48,18 @@ resource "libvirt_network" "network" {
   }
 }
 
-# Creates base OS image for the machines
-resource "libvirt_volume" "base" {
-  name = "${var.resource_name_prefix}base-volume"
+resource "libvirt_volume" "controller_base" {
+  name = "${var.resource_name_prefix}controller-base-volume"
   pool = libvirt_pool.resource_pool.name
 
-  source = pathexpand(var.machine_image_source)
+  source = pathexpand(var.controller_image_source)
+}
+
+resource "libvirt_volume" "worker_base" {
+  name = "${var.resource_name_prefix}worker-base-volume"
+  pool = libvirt_pool.resource_pool.name
+
+  source = pathexpand(var.worker_image_source)
 }
 
 module "controllers" {
@@ -63,7 +69,7 @@ module "controllers" {
 
   libvirt_provider_uri       = var.libvirt_provider_uri
   libvirt_resource_pool_name = libvirt_pool.resource_pool.name
-  libvirt_base_volume_id     = libvirt_volume.base.id
+  libvirt_base_volume_id     = libvirt_volume.controller_base.id
   libvirt_network_id         = libvirt_network.network.id
 
   machine_name       = "${var.resource_name_prefix}controller-${count.index}"
@@ -83,8 +89,10 @@ module "workers" {
 
   libvirt_provider_uri       = var.libvirt_provider_uri
   libvirt_resource_pool_name = libvirt_pool.resource_pool.name
-  libvirt_base_volume_id     = libvirt_volume.base.id
+  libvirt_base_volume_id     = libvirt_volume.worker_base.id
   libvirt_network_id         = libvirt_network.network.id
+
+  cloudinit_extra_user_data = var.worker_cloudinit_extra_user_data
 
   machine_name       = "${var.resource_name_prefix}worker-${count.index}"
   machine_dns_domain = libvirt_network.network.domain
@@ -103,7 +111,7 @@ module "loadbalancer" {
 
   libvirt_provider_uri       = var.libvirt_provider_uri
   libvirt_resource_pool_name = libvirt_pool.resource_pool.name
-  libvirt_base_volume_id     = libvirt_volume.base.id
+  libvirt_base_volume_id     = libvirt_volume.controller_base.id
   libvirt_network_id         = libvirt_network.network.id
 
   machine_name       = "${var.resource_name_prefix}lb"
@@ -142,7 +150,7 @@ module "loadbalancer" {
     }]
   }
 
-  cloudinit_network_config = startswith(var.machine_image_source, "alpine-image/") ? {
+  cloudinit_network_config = startswith(var.controller_image_source, "alpine-image/") ? {
     version   = 2
     ethernets = { eth0 = { dhcp4 = true, dhcp6 = true, }, }
   } : null

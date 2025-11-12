@@ -71,14 +71,36 @@ variable "libvirt_network_dns_domain" {
 
 # General virtual machine configuration
 
-variable "machine_image_source" {
+variable "controller_image_source" {
   type        = string
-  description = "Image source, which can be path on host's filesystem or URL."
+  description = "Controller image source, which can be a path on the host's filesystem or a URL."
   default     = "alpine-image/image.qcow2"
 
   validation {
-    condition     = length(var.machine_image_source) != 0
-    error_message = "Virtual machine image source is missing."
+    condition     = length(var.controller_image_source) != 0
+    error_message = "Controller virtual machine image source is missing."
+  }
+}
+
+variable "worker_image_source" {
+  type        = string
+  description = "Worker image source, which can be a path on the host's filesystem or a URL."
+  default     = "alpine-image/image.qcow2"
+
+  validation {
+    condition     = length(var.worker_image_source) != 0
+    error_message = "Worker virtual machine image source is missing."
+  }
+}
+
+variable "worker_cloudinit_extra_user_data" {
+  type    = map(any)
+  description = "Extra cloud-init user data for worker nodes."
+  default = {}
+
+  validation {
+    condition     = var.worker_cloudinit_extra_user_data != null
+    error_message = "Extra cloud-init user data for worker cannot be null."
   }
 }
 
