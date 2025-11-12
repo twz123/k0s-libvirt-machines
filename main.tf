@@ -93,6 +93,7 @@ module "workers" {
   libvirt_network_id         = libvirt_network.network.id
 
   cloudinit_extra_user_data = var.worker_cloudinit_extra_user_data
+  cloudinit_extra_runcmds   = var.worker_cloudinit_extra_runcmds
 
   machine_name       = "${var.resource_name_prefix}worker-${count.index}"
   machine_dns_domain = libvirt_network.network.domain

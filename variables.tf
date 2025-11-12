@@ -104,6 +104,17 @@ variable "worker_cloudinit_extra_user_data" {
   }
 }
 
+variable "worker_cloudinit_extra_runcmds" {
+  type        = list(string)
+  description = "Extra cloud-init runcmds for worker nodes."
+  default     = []
+
+  validation {
+    condition     = var.worker_cloudinit_extra_runcmds != null
+    error_message = "Extra cloud-init runcmds for worker nodes cannot be null."
+  }
+}
+
 variable "machine_user" {
   type        = string
   description = "Username used to SSH into virtual machines."
