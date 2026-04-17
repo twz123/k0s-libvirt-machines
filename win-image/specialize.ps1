@@ -47,7 +47,7 @@ try {
 
   # Register pwsh/powershell as default shell
   $pwsh = [System.IO.Path]::Combine($env:ProgramFiles, 'PowerShell', '7', 'pwsh.exe')
-  if (Get-Item $pwsh) {
+  if (Get-Item $pwsh -ErrorAction SilentlyContinue) {
     New-ItemProperty -Path HKLM:\SOFTWARE\OpenSSH -Name DefaultShell -PropertyType String -Value $pwsh -Force | Out-Null
   }
   elseif ($powershell = Get-Command powershell -ErrorAction SilentlyContinue) {
@@ -79,8 +79,38 @@ for ($attempt = 1; $true; $attempt++) {
   Start-Sleep -Seconds 1
 }
 
-#Get-WindowsFeature -Name Containers, Hyper-V
-# Install-WindowsFeature -Name Hyper-V, Containers -IncludeAllSubFeature
+try {
+  Write-Information "Unpacking age"
+  [IO.Compression.ZipFile]::OpenRead((Resolve-Path F:\age-v*-windows-amd64.zip).Path).Entries | ForEach-Object {
+    if (-not $_.Name) { return } # skip directories
+    $parts = $_.FullName -split '[\\/]' | Select-Object -Skip 1
+    if ($parts.Count -ne 1) { return }
+    $destPath = [System.IO.Path]::Combine($env:SystemRoot, 'system32', $parts)
+    [System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, $destPath, $true)
+  }
+
+  $adminUser = (Get-LocalUser | Where-Object { $_.SID -like "S-1-5-21-*-500" })
+  if (-not $adminUser) {
+    throw "Administrative account not found"
+  }
+
+  # Generate a random 18 byte password (will be 24 ASCII characters)
+  $bytes = New-Object byte[] 18
+  [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+  $password = [Convert]::ToBase64String($bytes).Replace('+', '-').Replace('/', '_')
+
+  # Store that password in an age-encrypted file.
+  $password | & age -a -R F:\authorized_keys > \password.txt.age
+  $password = ConvertTo-SecureString $password -AsPlainText -Force
+
+  # Set that password as the admin password.
+  Write-Information "Setting password for $adminUser"
+  Set-LocalUser -Name $adminUser.Name -Password $password
+}
+catch {
+  [string]$msg = $_.Exception.Message
+  Write-Warning "Failed to generate, encrypt, store and set the password for the administrative account: $msg"
+}
 
 Write-Information 'Done'
 Stop-Transcript

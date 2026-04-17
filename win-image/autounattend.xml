@@ -188,6 +188,13 @@
         <SkipMachineOOBE>true</SkipMachineOOBE>
       </OOBE>
     </component>
+
+    <!-- Disable Microsoft Customer Experience Improvement Program -->
+    <component name="Microsoft-Windows-CEIPEnable"
+      processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral"
+      versionScope="nonSxS">
+      <CEIPEnable>false</CEIPEnable>
+    </component>
   </settings>
 
 </unattend>

@@ -1,24 +1,46 @@
 # Creating Windows QEMU virtual machines
 
-Prerequisites:
+## Prerequisites
 
 * [Quickemu]
 * `jq`
 * `curl`
 * `mkisofs`
+* `socat` (for controlling the QEMU virtual machine)
 
 Select and download the Windows 2025 Server ISO from the [Windows Server 2025
 download page][2025-dl] in the Microsoft Evaluation Center. Place this as
-`server-2025.iso` in this directory. Run `make`. The resulting disk image should
-be located at `server-2025/disk.qcow2`. Note that the make target won't block
-and you have to power off the QEMU VM manually after the installation finished.
+`server-2025.iso` in this directory.
 
 [Quickemu]: https://github.com/quickemu-project/quickemu
 [2025-dl]: https://www.microsoft.com/en-us/evalcenter/download-windows-server-2025
 
+## Installation process
+
+Run `make GITHUB_OWNER_NAME=<your-github-id>`. Note that the make target won't
+block and you have to power off the QEMU wirtual machine manually after the
+installation finished.
+
+Once `make` has exited successfully, the Windows Server installation process
+should start in a QEMU window. Shortly after that, the screen will turn black.
+This is normal. The VM will restart several times during the installation
+process. Then, you will see activity on the screen again. The installation is
+done when you see the "Press Ctrl+Alt+Del to unlock" message. You can shut down
+the VM via `make powerdown`.
+
+The resulting disk image should be located at `server-2025/disk.qcow2`.
+
+Subsequent invocations of `make` will start the already installed VM. OpenSSH is
+preconfigured. Yo can log in to the administrative account using your private
+key via `make ssh`. The password of the administrative account is randomly set
+during installation time. The age-encrypted password (using your public SSH key)
+is stored in `C:\password.txt.age`.
+
 ## libvirt example configuration
 
 You have to copy the `OVMF_CODE.fd` and `OVMF_VARS.fd` into the right location.
+They can be found in the `server-2025` directory, possibly referenced in
+`server-2025/server-2025.sh`.
 
 ```xml
 <domain type="kvm">
