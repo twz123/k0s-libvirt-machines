@@ -24,6 +24,11 @@ You have to copy the `OVMF_CODE.fd` and `OVMF_VARS.fd` into the right location.
 <domain type="kvm">
   <name>win2025-worker-0</name>
   <uuid>c69dbae7-bcd1-4c55-a2bd-152e0980c80b</uuid>
+  <metadata>
+    <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
+      <libosinfo:os id="http://microsoft.com/win/2k25"/>
+    </libosinfo:libosinfo>
+  </metadata>
   <memory unit="KiB">8290304</memory>
   <currentMemory unit="KiB">8290304</currentMemory>
   <vcpu placement="static">4</vcpu>
@@ -55,9 +60,9 @@ You have to copy the `OVMF_CODE.fd` and `OVMF_VARS.fd` into the right location.
   </pm>
   <devices>
     <emulator>/run/libvirt/nix-emulators/qemu-system-x86_64</emulator>
-    <disk type="file" device="disk">
+    <disk type="volume" device="disk">
       <driver name="qemu" type="qcow2"/>
-      <source file="/var/lib/libvirt/pools/win2025-resource-pool/win2025-worker-0-boot.qcow2"/>
+      <source pool="win2025-resource-pool" volume="win2025-worker-0-boot.qcow2"/>
       <target dev="vda" bus="virtio"/>
       <address type="pci" domain="0x0000" bus="0x05" slot="0x00" function="0x0"/>
     </disk>
@@ -147,14 +152,6 @@ You have to copy the `OVMF_CODE.fd` and `OVMF_VARS.fd` into the right location.
       <model type="virtio"/>
       <address type="pci" domain="0x0000" bus="0x01" slot="0x00" function="0x0"/>
     </interface>
-    <serial type="pty">
-      <target type="isa-serial" port="0">
-        <model name="isa-serial"/>
-      </target>
-    </serial>
-    <console type="pty">
-      <target type="serial" port="0"/>
-    </console>
     <channel type="unix">
       <target type="virtio" name="org.qemu.guest_agent.0"/>
       <address type="virtio-serial" controller="0" bus="0" port="2"/>
@@ -163,18 +160,12 @@ You have to copy the `OVMF_CODE.fd` and `OVMF_VARS.fd` into the right location.
       <target type="virtio" name="com.redhat.spice.0"/>
       <address type="virtio-serial" controller="0" bus="0" port="1"/>
     </channel>
-    <input type="tablet" bus="usb">
-      <address type="usb" bus="0" port="1"/>
-    </input>
     <input type="mouse" bus="ps2"/>
     <input type="keyboard" bus="ps2"/>
     <graphics type="spice" autoport="yes">
       <listen type="address"/>
       <image compression="off"/>
     </graphics>
-    <sound model="ich9">
-      <address type="pci" domain="0x0000" bus="0x00" slot="0x1b" function="0x0"/>
-    </sound>
     <audio id="1" type="spice"/>
     <video>
       <model type="qxl" ram="65536" vram="65536" vgamem="16384" heads="1" primary="yes"/>
