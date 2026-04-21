@@ -4,7 +4,7 @@ ADMIN_ACCOUNT := Administrator
 age_version := 1.3.1
 
 server-2025/disk.vmdk: server-2025.iso server-2025.conf virtio-win.iso unattended.iso
-# https://github.com/quickemu-project/quickemu/blob/4.9.7/quickemu#L1386
+# https://github.com/quickemu-project/quickemu/blob/4.9.9/quickemu#L1966
 	mkdir -p server-2025
 	quickemu --vm server-2025.conf
 
@@ -18,7 +18,7 @@ PowerShell-win-x64.msi:
 authorized_keys:
 	curl -Lo $@ https://github.com/$(GITHUB_OWNER_NAME).keys
 
-# https://github.com/quickemu-project/quickemu/blob/4.9.7/quickget#L2977-L2979
+# https://github.com/quickemu-project/quickemu/blob/4.9.9/quickget#L3274-L3275
 
 spice-webdavd-x64-latest.msi:
 	curl -Lo $@ https://www.spice-space.org/download/windows/spice-webdavd/$@
@@ -26,14 +26,11 @@ spice-webdavd-x64-latest.msi:
 spice-vdagent-x64-0.10.0.msi:
 	curl -Lo $@ https://www.spice-space.org/download/windows/vdagent/vdagent-win-0.10.0/$@
 
-UsbDk_1.0.22_x64.msi:
-	curl -Lo $@ https://www.spice-space.org/download/windows/usbdk/$@
-
 age-v$(age_version)-windows-amd64.zip:
 	curl -Lo $@ https://github.com/FiloSottile/age/releases/download/v$(age_version)/$@
 
 unattended.iso: autounattend.xml PowerShell-win-x64.msi specialize.ps1 authorized_keys
-unattended.iso: spice-webdavd-x64-latest.msi spice-vdagent-x64-0.10.0.msi UsbDk_1.0.22_x64.msi
+unattended.iso: spice-webdavd-x64-latest.msi spice-vdagent-x64-0.10.0.msi
 unattended.iso: age-v$(age_version)-windows-amd64.zip
 unattended.iso:
 	mkisofs -quiet -iso-level 3 -J -R -V UNATTEND -o '$@' $^
@@ -54,6 +51,5 @@ clean:
 	rm -f PowerShell-win-x64.msi
 	rm -f spice-vdagent-x64-0.10.0.msi
 	rm -f spice-webdavd-x64-latest.msi
-	rm -f UsbDk_1.0.22_x64.msi
 	rm -f age-v$(age_version)-windows-amd64.zip
 	rm -f unattended.iso
