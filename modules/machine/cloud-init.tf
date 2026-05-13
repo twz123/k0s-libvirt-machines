@@ -16,7 +16,8 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
 
     users = [{
       name                = var.machine_user
-      sudo                = "ALL=(ALL) NOPASSWD:ALL"
+      sudo                = ["ALL=(ALL) NOPASSWD:ALL"]
+      doas                = ["permit nopass ${var.machine_user}"]
       home                = "/home/${var.machine_user}"
       shell               = "/bin/sh"
       lock_passwd         = true
