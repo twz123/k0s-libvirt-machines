@@ -5,6 +5,8 @@ TF ?= tofu
 
 PROFILE ?= k0s
 
+.DELETE_ON_ERROR:
+
 apply: profiles/$(PROFILE)/kubeconfig
 init: .terraform/.init
 destroy:
@@ -63,6 +65,85 @@ $(foreach cmd,$(TF_STATE_CMDS),$(eval $(cmd): .tf.$(cmd).$(PROFILE)))
 .PHONY: .alpine-image
 .alpine-image:
 	$(MAKE) -C alpine-image image.qcow2
+
+Arch-Linux-x86_64-cloudimg.qcow2:
+	truncate -s0 -- '$@'
+	chattr +C -- '$@'
+	curl -Lo '$@' -- 'https://fastly.mirror.pkgbuild.com/images/latest/$@'
+	$(info qemu-img resize -- '$@' 20G)
+	# virt-customize -a '$@' --root-password password:arch # in package guestfs-tools
+
+debian-12-genericcloud-amd64.qcow2:
+	truncate -s0 -- '$@'
+	chattr +C -- '$@'
+	curl -Lo '$@' -- 'https://cloud.debian.org/images/cloud/bookworm/latest/$@'
+
+Fedora-Cloud-Base-Generic-43-1.6.x86_64.qcow2:
+	truncate -s0 -- '$@'
+	chattr +C -- '$@'
+	curl -Lo '$@' -- 'https://download.fedoraproject.org/pub/fedora/linux/releases/43/Cloud/x86_64/images/$@'
+
+OL9U6_x86_64-kvm-b265.qcow2:
+	truncate -s0 -- '$@'
+	chattr +C -- '$@'
+	curl -Lo '$@' -- 'https://yum.oracle.com/templates/OracleLinux/OL9/u6/x86_64/$@'
+
+Rocky-9-GenericCloud.latest.x86_64.qcow2:
+	truncate -s0 -- '$@'
+	chattr +C -- '$@'
+	curl -Lo '$@' -- 'https://dl.rockylinux.org/vault/rocky/9.4/images/x86_64/$@'
+
+Rocky-10-GenericCloud-Base.latest.x86_64.qcow2:
+	truncate -s0 -- '$@'
+	chattr +C -- '$@'
+	curl -Lo '$@' -- 'https://dl.rockylinux.org/pub/rocky/10/images/x86_64/$@'
+
+Ubuntu-22.04-LTS-server-cloudimg.qcow2:
+	truncate -s0 -- '$@'
+	chattr +C -- '$@'
+	curl -Lo '$@' -- https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
+	$(info This image needs to be resized)
+	$(info qemu-img resize -- '$@' 20G)
+	$(info sudo modprobe nbd)
+	$(info sudo qemu-nbd --connect=/dev/nbd0 -- '$@')
+	$(info sudo growpart /dev/nbd0 1)
+	$(info sudo resize2fs /dev/nbd0p1)
+	$(info sudo e2fsck -f /dev/nbd0p1)
+	$(info sudo qemu-nbd --disconnect /dev/nbd0)
+	$(info sudo modprobe -r nbd)
+
+Ubuntu-24.04-LTS-server-cloudimg.qcow2:
+	truncate -s0 -- '$@'
+	chattr +C -- '$@'
+	curl -Lo '$@' -- https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+	$(info This image needs to be resized)
+	$(info qemu-img resize -- '$@' 20G)
+	$(info sudo modprobe nbd)
+	$(info sudo qemu-nbd --connect=/dev/nbd0 -- '$@')
+	$(info sudo growpart /dev/nbd0 1)
+	$(info sudo resize2fs /dev/nbd0p1)
+	$(info sudo e2fsck -f /dev/nbd0p1)
+	$(info sudo qemu-nbd --disconnect /dev/nbd0)
+	$(info sudo modprobe -r nbd)
+
+Ubuntu-26.04-LTS-server-cloudimg.qcow2:
+	truncate -s0 -- '$@'
+	chattr +C -- '$@'
+	curl -Lo '$@' -- https://cloud-images.ubuntu.com/resolute/current/resolute-server-cloudimg-amd64.img
+	$(info This image needs to be resized)
+	$(info qemu-img resize -- '$@' 20G)
+	$(info sudo modprobe nbd)
+	$(info sudo qemu-nbd --connect=/dev/nbd0 -- '$@')
+	$(info sudo growpart /dev/nbd0 1)
+	$(info sudo resize2fs /dev/nbd0p1)
+	$(info sudo e2fsck -f /dev/nbd0p1)
+	$(info sudo qemu-nbd --disconnect /dev/nbd0)
+	$(info sudo modprobe -r nbd)
+
+CentOS-Stream-GenericCloud-9-latest.x86_64.qcow2:
+	truncate -s0 -- '$@'
+	chattr +C -- '$@'
+	curl -Lo '$@' -- https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-GenericCloud-9-latest.x86_64.qcow2
 
 ssh.%: ID ?= 0
 ssh.%: SSH_CONNECT ?= $(shell $(MAKE) -s output -- -json | $(JQ) -r '@sh "-i \(.ssh.value.key_file) \(.ssh.value.user)@\((.machines.value[] | select(.name | endswith("$(patsubst .%,%,$(suffix $@))-$(ID)")).ipv4))"')
