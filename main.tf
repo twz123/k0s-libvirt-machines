@@ -71,6 +71,8 @@ module "controllers" {
   libvirt_resource_pool_name = libvirt_pool.resource_pool.name
   libvirt_base_volume_id     = libvirt_volume.controller_base.id
   libvirt_network_id         = libvirt_network.network.id
+  libvirt_network_ipv4_cidr  = var.libvirt_network_ipv4_cidr
+  libvirt_network_ipv6_cidr  = var.libvirt_network_ipv6_cidr
 
   machine_name       = "${var.resource_name_prefix}controller-${count.index}"
   machine_dns_domain = libvirt_network.network.domain
@@ -91,6 +93,8 @@ module "workers" {
   libvirt_resource_pool_name = libvirt_pool.resource_pool.name
   libvirt_base_volume_id     = libvirt_volume.worker_base.id
   libvirt_network_id         = libvirt_network.network.id
+  libvirt_network_ipv4_cidr  = var.libvirt_network_ipv4_cidr
+  libvirt_network_ipv6_cidr  = var.libvirt_network_ipv6_cidr
 
   cloudinit_extra_user_data = var.worker_cloudinit_extra_user_data
   cloudinit_extra_runcmds   = var.worker_cloudinit_extra_runcmds
@@ -114,6 +118,8 @@ module "loadbalancer" {
   libvirt_resource_pool_name = libvirt_pool.resource_pool.name
   libvirt_base_volume_id     = libvirt_volume.controller_base.id
   libvirt_network_id         = libvirt_network.network.id
+  libvirt_network_ipv4_cidr  = var.libvirt_network_ipv4_cidr
+  libvirt_network_ipv6_cidr  = var.libvirt_network_ipv6_cidr
 
   machine_name       = "${var.resource_name_prefix}lb"
   machine_dns_domain = libvirt_network.network.domain

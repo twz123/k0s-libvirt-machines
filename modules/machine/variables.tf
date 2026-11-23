@@ -18,6 +18,39 @@ variable "libvirt_network_id" {
   description = "Libvirt network ID in which the virtual machine resides"
 }
 
+variable "libvirt_network_ipv4_cidr" {
+  type        = string
+  description = "IPv4 CIDR of the libvirt network in which the virtual machine resides"
+
+  validation {
+    condition     = can(cidrnetmask(var.libvirt_network_ipv4_cidr))
+    error_message = "Invalid IPv4 network CIDR."
+  }
+
+  validation {
+    condition     = try(cidrsubnet(var.libvirt_network_ipv4_cidr, 0, 0) == var.libvirt_network_ipv4_cidr, true)
+    error_message = "IPv4 network CIDR is not a network address in canonical form. Did you mean ${try(cidrsubnet(var.libvirt_network_ipv4_cidr, 0, 0), "")}?"
+  }
+}
+
+variable "libvirt_network_ipv6_cidr" {
+  type        = string
+  description = "IPv6 CIDR of the libvirt network in which the virtual machine resides, or null if it has none"
+
+  validation {
+    condition = var.libvirt_network_ipv6_cidr == null || (
+      # The cidrnetmask function only accepts IPv4 CIDRs.
+      can(cidrhost(var.libvirt_network_ipv6_cidr, 0)) && !can(cidrnetmask(var.libvirt_network_ipv6_cidr))
+    )
+    error_message = "Invalid IPv6 network CIDR."
+  }
+
+  validation {
+    condition     = try(cidrsubnet(var.libvirt_network_ipv6_cidr, 0, 0) == var.libvirt_network_ipv6_cidr, true)
+    error_message = "IPv6 network CIDR is not a network address in canonical form. Did you mean ${try(cidrsubnet(var.libvirt_network_ipv6_cidr, 0, 0), "")}?"
+  }
+}
+
 variable "machine_name" {
   type        = string
   description = "The virtual machine's name"

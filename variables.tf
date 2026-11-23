@@ -42,8 +42,19 @@ variable "libvirt_network_ipv4_cidr" {
   description = "IPv4 CIDR of the libvirt network of the virtual machines."
 
   validation {
-    condition     = can(regex("^([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])){3}/([1-9]|[1-2][0-9]|3[0-2])$", var.libvirt_network_ipv4_cidr))
+    condition     = can(cidrnetmask(var.libvirt_network_ipv4_cidr))
     error_message = "Invalid IPv4 network CIDR."
+  }
+
+  validation {
+    condition     = try(cidrsubnet(var.libvirt_network_ipv4_cidr, 0, 0) == var.libvirt_network_ipv4_cidr, true)
+    error_message = "IPv4 network CIDR is not a network address in canonical form. Did you mean ${try(cidrsubnet(var.libvirt_network_ipv4_cidr, 0, 0), "")}?"
+  }
+
+  validation {
+    # The first address is for the host, the rest is handed out to VMs.
+    condition     = try(tonumber(split("/", var.libvirt_network_ipv4_cidr)[1]) <= 29, true)
+    error_message = "IPv4 network CIDR is too small, it needs to be a /29 or larger."
   }
 }
 
@@ -53,8 +64,22 @@ variable "libvirt_network_ipv6_cidr" {
   default     = null
 
   validation {
-    condition     = var.libvirt_network_ipv6_cidr == null || can(regex("^[0-9a-f]{1,4}(:[0-9a-f]{1,4})+::/[0-9]+$", var.libvirt_network_ipv6_cidr))
+    condition = var.libvirt_network_ipv6_cidr == null || (
+      # The cidrnetmask function only accepts IPv4 CIDRs.
+      can(cidrhost(var.libvirt_network_ipv6_cidr, 0)) && !can(cidrnetmask(var.libvirt_network_ipv6_cidr))
+    )
     error_message = "Invalid IPv6 network CIDR."
+  }
+
+  validation {
+    condition     = try(cidrsubnet(var.libvirt_network_ipv6_cidr, 0, 0) == var.libvirt_network_ipv6_cidr, true)
+    error_message = "IPv6 network CIDR is not a network address in canonical form. Did you mean ${try(cidrsubnet(var.libvirt_network_ipv6_cidr, 0, 0), "")}?"
+  }
+
+  validation {
+    # The first address is for the host, the rest is handed out to VMs.
+    condition     = try(tonumber(split("/", var.libvirt_network_ipv6_cidr)[1]) <= 125, true)
+    error_message = "IPv6 network CIDR is too small, it needs to be a /125 or larger."
   }
 }
 
