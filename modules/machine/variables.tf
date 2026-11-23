@@ -81,6 +81,28 @@ variable "machine_ssh_public_key" {
   description = "SSH public key used to SSH into the virtual machine"
 }
 
+variable "machine_additional_ips" {
+  type        = list(string)
+  description = "IP addresses that may show up on the virtual machine, but aren't its own ones"
+  default     = []
+
+  validation {
+    condition     = var.machine_additional_ips != null
+    error_message = "Additional IPs cannot be null."
+  }
+
+  validation {
+    condition = alltrue([
+      for ip in var.machine_additional_ips :
+      ip != null && (
+        ip == try(cidrhost("${ip}/128", 0), null) ||
+        ip == try(cidrhost("${ip}/32", 0), null)
+      )
+    ])
+    error_message = "Additional IPs need to be plain IP addresses in canonical form."
+  }
+}
+
 variable "cloudinit_extra_runcmds" {
   type        = list(string)
   description = "xoxo"

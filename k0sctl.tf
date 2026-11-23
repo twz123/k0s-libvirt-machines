@@ -5,6 +5,16 @@ locals {
 
   use_remote_k0s_version = var.k0s_version == "stable" || var.k0s_version == "latest"
 
+  k0s_cplb_ips = distinct([
+    for ip in concat(
+      flatten(try([
+        for instance in var.k0s_config_spec.network.controlPlaneLoadBalancing.keepalived.vrrpInstances :
+        [for cidr in instance.virtualIPs : split("/", cidr)[0]]
+      ], [])),
+      try(var.k0s_config_spec.network.controlPlaneLoadBalancing.keepalived.virtualServers.*.ipAddress, []),
+    ) : try(cidrhost("${ip}/128", 0), cidrhost("${ip}/32", 0), ip)
+  ])
+
   machines = concat(
     [for machine in module.controllers.*.info :
       merge(machine, {

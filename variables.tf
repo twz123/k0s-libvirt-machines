@@ -263,6 +263,7 @@ variable "k0s_config_spec" {
           port = optional(number),
         })),
       })),
+      controlPlaneLoadBalancing = optional(any),
     })),
     images = optional(map(map(object({
       image   = optional(string),

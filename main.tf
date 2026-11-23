@@ -77,6 +77,9 @@ module "controllers" {
   machine_name       = "${var.resource_name_prefix}controller-${count.index}"
   machine_dns_domain = libvirt_network.network.domain
 
+  # Ignore the CPLB IPs when determining the machine's primary address.
+  machine_additional_ips = local.k0s_cplb_ips
+
   machine_num_cpus = var.controller_num_cpus
   machine_memory   = var.controller_memory
 

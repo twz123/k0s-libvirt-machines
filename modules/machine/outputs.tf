@@ -5,7 +5,8 @@ locals {
     type = length(regexall(":", addr)) > 0 ? "ipv6" : "ipv4"
   }]
 
-  # Only consider the addresses that are part of the libvirt network.
+  # Only consider the addresses that are part of the libvirt network,
+  # and those that aren't listed as additional IPs.
   addresses = { for family, cidr in {
     ipv4 = var.libvirt_network_ipv4_cidr
     ipv6 = var.libvirt_network_ipv6_cidr
@@ -13,6 +14,7 @@ locals {
     for addr in local.interface_addresses : addr.addr
     if addr.type != family ? false : (
       cidrhost("${addr.addr}/${split("/", cidr)[1]}", 0) == cidrhost(cidr, 0)
+      && !contains(var.machine_additional_ips, addr.addr)
     )
   ] }
 }
