@@ -8,14 +8,17 @@ variable "libvirt_resource_pool_name" {
   description = "Name of libvirt the resource pool into which the virtual machine will be placed"
 }
 
-variable "libvirt_base_volume_id" {
-  type        = string
-  description = "Libvirt base image voulme ID for the virtual machine"
+variable "libvirt_base_volume" {
+  type = object({
+    path     = string
+    capacity = number
+  })
+  description = "Libvirt base image volume for the virtual machine"
 }
 
-variable "libvirt_network_id" {
+variable "libvirt_network_name" {
   type        = string
-  description = "Libvirt network ID in which the virtual machine resides"
+  description = "Name of the libvirt network in which the virtual machine resides"
 }
 
 variable "libvirt_network_ipv4_cidr" {

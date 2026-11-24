@@ -1,9 +1,7 @@
 locals {
-  # The addresses of the machine's network interface, as seen by the guest agent.
-  interface_addresses = [for addr in libvirt_domain.machine.network_interface.0.addresses : {
-    addr = addr
-    type = length(regexall(":", addr)) > 0 ? "ipv6" : "ipv4"
-  }]
+  # The addresses of all the machine's network interfaces, as seen by the guest agent.
+  # This includes the loopback device and whatever Kubernetes creates.
+  interface_addresses = flatten(data.libvirt_domain_interface_addresses.machine.interfaces.*.addrs)
 
   # Only consider the addresses that are part of the libvirt network,
   # and those that aren't listed as additional IPs.
@@ -28,7 +26,7 @@ output "info" {
     ipv6 = length(local.addresses.ipv6) == 1 ? local.addresses.ipv6[0] : null
   }
 
-  description = "Virtual machine info containing it's name and IP addresses"
+  description = "Virtual machine info containing its name and IP addresses"
 
   # A powered-off machine doesn't have any IPs.
   # Failing on that would prevent it from being started again.

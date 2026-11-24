@@ -111,6 +111,15 @@ resource "null_resource" "k0sctl_apply" {
     airgap_image_bundle_hash = var.k0sctl_airgap_image_bundle == null ? null : filesha256(var.k0sctl_airgap_image_bundle)
   }
 
+  lifecycle {
+    precondition {
+      condition = alltrue([
+        for machine in concat(local.machines, module.loadbalancer.*.info) : machine.ipv4 != null
+      ])
+      error_message = "Cannot run k0sctl without the IPv4 addresses of ${join(", ", [for machine in concat(local.machines, module.loadbalancer.*.info) : machine.name if machine.ipv4 == null])}. Check that these machines are running and that their guest agents are up."
+    }
+  }
+
   provisioner "local-exec" {
     environment = {
       K0SCTL_BINARY = var.k0sctl_binary

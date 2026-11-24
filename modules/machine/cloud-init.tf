@@ -6,8 +6,12 @@ resource "random_password" "password" {
 
 # Assemble the cloud-init iso
 resource "libvirt_cloudinit_disk" "cloudinit" {
-  name = "${var.machine_name}-cloudinit.iso"
-  pool = var.libvirt_resource_pool_name
+  name = "${var.machine_name}-cloudinit"
+
+  meta_data = jsonencode({
+    instance-id    = var.machine_name
+    local-hostname = var.machine_name
+  })
 
   user_data = format("#cloud-config\n%s", jsonencode(merge(var.cloudinit_extra_user_data, {
     hostname         = var.machine_name
@@ -74,4 +78,14 @@ resource "libvirt_cloudinit_disk" "cloudinit" {
   })))
 
   network_config = var.cloudinit_network_config == null ? null : jsonencode(var.cloudinit_network_config)
+}
+
+# Upload the cloud-init iso into the resource pool
+resource "libvirt_volume" "cloudinit" {
+  name = "${var.machine_name}-cloudinit.iso"
+  pool = var.libvirt_resource_pool_name
+
+  create = {
+    content = { url = libvirt_cloudinit_disk.cloudinit.path }
+  }
 }
